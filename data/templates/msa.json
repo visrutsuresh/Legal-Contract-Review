@@ -1,0 +1,88 @@
+{
+  "clauses": [
+    {
+      "clause_type": "parties",
+      "heading": "Parties",
+      "standard_text": "This Master Services Agreement is made between Aldergate Consulting Pte Ltd (the Client) and the counterparty named in the signature block (the Provider). It sets the terms under which the Provider performs services for the Client.",
+      "required": true
+    },
+    {
+      "clause_type": "scope",
+      "heading": "Services",
+      "standard_text": "The Provider will perform the services described in each Statement of Work agreed and signed under this Agreement, and each signed Statement of Work forms part of this Agreement. No work may begin before a Statement of Work is signed.",
+      "required": true
+    },
+    {
+      "clause_type": "payment",
+      "heading": "Fees and Payment",
+      "standard_text": "The Client pays undisputed invoices within thirty (30) days of receiving a valid invoice. Late amounts accrue simple interest at four percent (4%) per year. Fees are fixed for the initial term, and any change requires sixty (60) days written notice and the written agreement of both parties.",
+      "required": true
+    },
+    {
+      "clause_type": "term_termination",
+      "heading": "Term and Termination",
+      "standard_text": "This Agreement starts on the date of signature and runs for an initial term of twelve (12) months. Either party may terminate for convenience on thirty (30) days written notice, or immediately if the other party commits a material breach and does not fix it within fourteen (14) days of written notice.",
+      "required": true
+    },
+    {
+      "clause_type": "confidentiality",
+      "heading": "Confidentiality",
+      "standard_text": "Each party must keep the other's Confidential Information secret, use it only to perform this Agreement, and share it only with people who need it and are bound by equivalent obligations. This duty survives for three (3) years after this Agreement ends.",
+      "required": true
+    },
+    {
+      "clause_type": "ip",
+      "heading": "Intellectual Property",
+      "standard_text": "All deliverables and work product created for the Client under this Agreement become the Client's property once the related fees are paid in full. Each party keeps its pre-existing intellectual property and grants the other only the licence needed to use the deliverables as intended.",
+      "required": true
+    },
+    {
+      "clause_type": "liability",
+      "heading": "Limitation of Liability",
+      "standard_text": "Each party's total liability under this Agreement is capped at the fees paid or payable in the twelve (12) months before the event giving rise to the claim. Neither party is liable for indirect or consequential loss. Nothing limits liability for fraud or for breach of confidentiality.",
+      "required": true
+    },
+    {
+      "clause_type": "indemnity",
+      "heading": "Indemnity",
+      "standard_text": "Each party indemnifies the other against third-party claims caused by its breach of confidentiality or its infringement of intellectual property rights, provided the indemnified party gives prompt written notice and control of the defence and settlement.",
+      "required": true
+    },
+    {
+      "clause_type": "restraint",
+      "heading": "Non-Solicitation",
+      "standard_text": "During this Agreement and for six (6) months after it ends, neither party will solicit for employment the other party's employees who were directly involved in the services. General public job advertisements are not solicitation. No wider restraint applies.",
+      "required": true
+    },
+    {
+      "clause_type": "data_protection",
+      "heading": "Data Protection",
+      "standard_text": "Each party must comply with the Personal Data Protection Act 2012 (Singapore) when handling personal data under this Agreement, use that data only as needed to perform this Agreement, appoint sub-processors only with the other party's prior written consent, and notify the other party of any personal data breach within seventy-two (72) hours of becoming aware of it.",
+      "required": true
+    },
+    {
+      "clause_type": "other",
+      "heading": "Service Warranty",
+      "standard_text": "The Provider warrants that the services will be performed with reasonable skill and care by suitably qualified people. If any service does not meet this standard, the Provider will re-perform it promptly at no extra charge.",
+      "required": true
+    },
+    {
+      "clause_type": "governing_law",
+      "heading": "Governing Law",
+      "standard_text": "This Agreement is governed by the laws of Singapore. The parties submit to the exclusive jurisdiction of the courts of Singapore for any dispute arising out of or in connection with this Agreement.",
+      "required": true
+    },
+    {
+      "clause_type": "notices",
+      "heading": "Notices",
+      "standard_text": "Formal notices under this Agreement must be in writing and sent by hand, by registered post, or by email to the addresses stated in the signature block. A notice takes effect on the day it is received.",
+      "required": false
+    },
+    {
+      "clause_type": "boilerplate",
+      "heading": "General",
+      "standard_text": "This Agreement and its Statements of Work are the entire agreement between the parties. The Provider may not subcontract or assign any part of this Agreement without the Client's prior written consent. Amendments are valid only in writing signed by both parties.",
+      "required": true
+    }
+  ]
+}

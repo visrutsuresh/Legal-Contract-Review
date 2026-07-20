@@ -1,0 +1,51 @@
+{
+  "file": "vendor_brightquay.pdf",
+  "contract_type": "vendor",
+  "planted": [
+    {
+      "id": "ven-supply-asis",
+      "number": "2",
+      "clause_type": "scope",
+      "heading": "Supply",
+      "severity": "high",
+      "inspector": "template",
+      "note": "Goods supplied as seen, with no promise of matching any specification."
+    },
+    {
+      "id": "ven-pay-net90",
+      "number": "3",
+      "clause_type": "payment",
+      "heading": "Prices and Payment",
+      "severity": "medium",
+      "inspector": "financial",
+      "note": "Net-90 payment plus a two percent fee whenever the Client queries an invoice."
+    },
+    {
+      "id": "ven-inspect-48h",
+      "number": "5",
+      "clause_type": "other",
+      "heading": "Quality and Inspection",
+      "severity": "medium",
+      "inspector": "template",
+      "note": "Inspection window cut from ten business days to 48 hours, then all claims are waived."
+    },
+    {
+      "id": "ven-term-lock",
+      "number": "6",
+      "clause_type": "term_termination",
+      "heading": "Term and Termination",
+      "severity": "medium",
+      "inspector": "compliance",
+      "note": "Five-year lock-in with no exit for the Client, while the Vendor may leave at any time."
+    },
+    {
+      "id": "ven-liability-strike",
+      "number": "8",
+      "clause_type": "liability",
+      "heading": "Limitation of Liability",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "The Vendor's liability is excluded entirely, even for defective goods, while the Client's is unlimited."
+    }
+  ]
+}

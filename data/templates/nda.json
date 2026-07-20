@@ -1,0 +1,76 @@
+{
+  "clauses": [
+    {
+      "clause_type": "parties",
+      "heading": "Parties",
+      "standard_text": "This Mutual Non-Disclosure Agreement is made between Aldergate Consulting Pte Ltd and the counterparty named in the signature block. Each party may disclose Confidential Information to the other under this Agreement, and each party accepts the obligations below.",
+      "required": true
+    },
+    {
+      "clause_type": "scope",
+      "heading": "Confidential Information",
+      "standard_text": "Confidential Information means any non-public information disclosed by either party to the other, in any form, that is marked confidential or that a reasonable person would understand to be confidential. It does not include information that is publicly available, already known to the receiver, independently developed, or lawfully obtained from a third party without a duty of secrecy.",
+      "required": true
+    },
+    {
+      "clause_type": "confidentiality",
+      "heading": "Obligations of Confidentiality",
+      "standard_text": "The receiving party must keep Confidential Information strictly confidential, use it only to evaluate and carry out the business relationship between the parties, and disclose it only to its employees and professional advisers who need it for that purpose and who are bound by confidentiality obligations at least as strict as this Agreement.",
+      "required": true
+    },
+    {
+      "clause_type": "confidentiality",
+      "heading": "Compelled Disclosure",
+      "standard_text": "If the receiving party is required by law, regulation, or court order to disclose Confidential Information, it must give the disclosing party prompt written notice where lawfully permitted, cooperate with any attempt to limit the disclosure, and disclose only the minimum required.",
+      "required": false
+    },
+    {
+      "clause_type": "term_termination",
+      "heading": "Term and Survival",
+      "standard_text": "This Agreement runs for two (2) years from the date of signature unless ended earlier by either party on thirty (30) days written notice. The confidentiality obligations survive for three (3) years after this Agreement ends.",
+      "required": true
+    },
+    {
+      "clause_type": "ip",
+      "heading": "No Licence",
+      "standard_text": "Nothing in this Agreement grants either party any licence, ownership, or other right in the other party's Confidential Information or intellectual property. All Confidential Information remains the property of the disclosing party.",
+      "required": true
+    },
+    {
+      "clause_type": "confidentiality",
+      "heading": "Return or Destruction",
+      "standard_text": "On the disclosing party's written request, or when this Agreement ends, the receiving party must promptly return or securely destroy all Confidential Information and confirm in writing that it has done so, keeping only copies required by law.",
+      "required": true
+    },
+    {
+      "clause_type": "liability",
+      "heading": "Remedies",
+      "standard_text": "The parties agree that damages alone may not be an adequate remedy for a breach of this Agreement, and the disclosing party may seek injunctive or other equitable relief. Neither party is liable to the other for indirect or consequential loss under this Agreement.",
+      "required": true
+    },
+    {
+      "clause_type": "data_protection",
+      "heading": "Data Protection",
+      "standard_text": "If Confidential Information includes personal data, the receiving party must handle it in line with the Personal Data Protection Act 2012 (Singapore), use it only for the purposes of this Agreement, and notify the disclosing party within seventy-two (72) hours of becoming aware of any breach affecting that data.",
+      "required": true
+    },
+    {
+      "clause_type": "governing_law",
+      "heading": "Governing Law",
+      "standard_text": "This Agreement is governed by the laws of Singapore. The parties submit to the exclusive jurisdiction of the courts of Singapore for any dispute arising out of or in connection with this Agreement.",
+      "required": true
+    },
+    {
+      "clause_type": "notices",
+      "heading": "Notices",
+      "standard_text": "Formal notices under this Agreement must be in writing and sent by hand, by registered post, or by email to the addresses stated in the signature block. A notice takes effect on the day it is received.",
+      "required": false
+    },
+    {
+      "clause_type": "boilerplate",
+      "heading": "General",
+      "standard_text": "This Agreement is the entire agreement between the parties about its subject matter and replaces any earlier discussions. Neither party may assign it without the other's written consent, and any amendment is valid only in writing signed by both parties.",
+      "required": true
+    }
+  ]
+}

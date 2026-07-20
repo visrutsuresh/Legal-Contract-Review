@@ -1,0 +1,51 @@
+{
+  "file": "msa_novabright.docx",
+  "contract_type": "msa",
+  "planted": [
+    {
+      "id": "msa-pay-net120",
+      "number": "3",
+      "clause_type": "payment",
+      "heading": "Fees and Payment",
+      "severity": "high",
+      "inspector": "financial",
+      "note": "Payment stretched from net-30 to net-120, with instant suspension if late."
+    },
+    {
+      "id": "msa-term-autorenew",
+      "number": "4",
+      "clause_type": "term_termination",
+      "heading": "Term and Termination",
+      "severity": "medium",
+      "inspector": "risk",
+      "note": "Auto-renewal trap: 180 days notice to escape, and only the Provider may terminate for convenience."
+    },
+    {
+      "id": "msa-ip-provider-owns",
+      "number": "6",
+      "clause_type": "ip",
+      "heading": "Intellectual Property",
+      "severity": "high",
+      "inspector": "template",
+      "note": "Deliverables stay the Provider's property; the Client only gets a revocable internal-use licence."
+    },
+    {
+      "id": "msa-liability-unlimited",
+      "number": "7",
+      "clause_type": "liability",
+      "heading": "Limitation of Liability",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "The Client's liability is unlimited while the Provider's is capped at ten percent of three months of fees."
+    },
+    {
+      "id": "msa-dp-nobreach",
+      "number": "10",
+      "clause_type": "data_protection",
+      "heading": "Data Protection",
+      "severity": "high",
+      "inspector": "compliance",
+      "note": "No PDPA commitment and no duty to notify the Client of a data breach."
+    }
+  ]
+}

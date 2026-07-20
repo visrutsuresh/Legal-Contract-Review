@@ -1,0 +1,56 @@
+{
+  "file": "vendor_larkspur.docx",
+  "contract_type": "vendor",
+  "planted": [
+    {
+      "id": "ven-price-anytime",
+      "number": "3",
+      "clause_type": "payment",
+      "heading": "Prices and Payment",
+      "severity": "high",
+      "inspector": "financial",
+      "note": "Prices changeable at any time with no notice, applying even to confirmed orders."
+    },
+    {
+      "id": "ven-delivery-risk",
+      "number": "4",
+      "clause_type": "other",
+      "heading": "Delivery and Risk",
+      "severity": "medium",
+      "inspector": "template",
+      "note": "Risk moves to the Client when goods leave the warehouse, so the Client pays for transit damage."
+    },
+    {
+      "missing": true,
+      "clause_type": "liability",
+      "heading": "Limitation of Liability"
+    },
+    {
+      "id": "ven-indemnity-flip",
+      "number": "8",
+      "clause_type": "indemnity",
+      "heading": "Indemnity",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "Indemnity reversed: the Client covers the Vendor's losses, even those caused by the Vendor's own negligence."
+    },
+    {
+      "id": "ven-dp-subprocessors",
+      "number": "9",
+      "clause_type": "data_protection",
+      "heading": "Data Protection",
+      "severity": "medium",
+      "inspector": "compliance",
+      "note": "Any sub-processor in any country may handle personal data, with no notice or consent."
+    },
+    {
+      "id": "ven-notices-post-only",
+      "number": "11",
+      "clause_type": "notices",
+      "heading": "Notices",
+      "severity": "low",
+      "inspector": "template",
+      "note": "Email notices are void; registered post is the only valid channel."
+    }
+  ]
+}

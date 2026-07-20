@@ -1,0 +1,58 @@
+{
+  "clauses": [
+    {
+      "clause_type": "parties",
+      "heading": "Parties and Framework",
+      "standard_text": "This Statement of Work is made under the Master Services Agreement between Aldergate Consulting Pte Ltd (the Client) and the counterparty named in the signature block (the Provider). The terms of the Master Services Agreement apply to this Statement of Work.",
+      "required": true
+    },
+    {
+      "clause_type": "scope",
+      "heading": "Deliverables",
+      "standard_text": "The Provider will produce the deliverables described in the Deliverables Schedule attached to this Statement of Work. Any change to scope, deliverables, or timeline requires a written change order signed by both parties before work on the change begins.",
+      "required": true
+    },
+    {
+      "clause_type": "other",
+      "heading": "Timeline and Milestones",
+      "standard_text": "The Provider will meet the milestone dates in the Deliverables Schedule and must notify the Client in writing as soon as it becomes aware that any milestone is at risk, together with a recovery plan.",
+      "required": true
+    },
+    {
+      "clause_type": "payment",
+      "heading": "Fees and Payment",
+      "standard_text": "Fees are invoiced per milestone once the milestone is accepted, and each invoice is payable within thirty (30) days. Total fees are capped at the amount in the Fee Schedule, and no additional amount is payable without a signed change order.",
+      "required": true
+    },
+    {
+      "clause_type": "other",
+      "heading": "Acceptance",
+      "standard_text": "The Client has ten (10) business days to review each deliverable and may reject it with written reasons if it does not meet the Deliverables Schedule. The Provider must correct and resubmit rejected work at no extra charge. A deliverable is accepted when the Client confirms acceptance in writing.",
+      "required": true
+    },
+    {
+      "clause_type": "term_termination",
+      "heading": "Term and Cancellation",
+      "standard_text": "This Statement of Work ends when all deliverables are accepted and paid for, unless it is terminated earlier under the Master Services Agreement. The Client may cancel work not yet started on thirty (30) days written notice and pays only for work completed and accepted up to the cancellation date.",
+      "required": true
+    },
+    {
+      "clause_type": "ip",
+      "heading": "Intellectual Property",
+      "standard_text": "All deliverables under this Statement of Work become the Client's property once the related milestone fees are paid in full, as set out in the Master Services Agreement. The Provider may not reuse the Client's materials or deliverables for any other customer.",
+      "required": true
+    },
+    {
+      "clause_type": "liability",
+      "heading": "Liability",
+      "standard_text": "Liability under this Statement of Work is governed by the limitation of liability clause in the Master Services Agreement and counts toward the same cap. Nothing in this Statement of Work increases either party's liability.",
+      "required": true
+    },
+    {
+      "clause_type": "boilerplate",
+      "heading": "General",
+      "standard_text": "This Statement of Work and the Master Services Agreement form the entire agreement for this work. If they conflict, the Master Services Agreement prevails unless this Statement of Work expressly amends a named clause in writing.",
+      "required": true
+    }
+  ]
+}

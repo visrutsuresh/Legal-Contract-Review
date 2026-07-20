@@ -1,0 +1,51 @@
+{
+  "file": "sow_windmoor.docx",
+  "contract_type": "sow",
+  "planted": [
+    {
+      "id": "sow-scope-unilateral",
+      "number": "2",
+      "clause_type": "scope",
+      "heading": "Deliverables",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "The Provider may change scope and timeline at will and bill extra work at its own rates."
+    },
+    {
+      "id": "sow-pay-upfront",
+      "number": "4",
+      "clause_type": "payment",
+      "heading": "Fees and Payment",
+      "severity": "high",
+      "inspector": "financial",
+      "note": "All fees due on signature, non-refundable, before any work starts."
+    },
+    {
+      "id": "sow-acceptance-deemed",
+      "number": "5",
+      "clause_type": "other",
+      "heading": "Acceptance",
+      "severity": "medium",
+      "inspector": "template",
+      "note": "Deliverables deemed accepted on delivery, with no right to reject."
+    },
+    {
+      "id": "sow-cancel-fee",
+      "number": "6",
+      "clause_type": "term_termination",
+      "heading": "Term and Cancellation",
+      "severity": "medium",
+      "inspector": "financial",
+      "note": "Cancelling costs the full remaining fees plus fifteen percent."
+    },
+    {
+      "id": "sow-ip-reuse",
+      "number": "7",
+      "clause_type": "ip",
+      "heading": "Intellectual Property",
+      "severity": "high",
+      "inspector": "compliance",
+      "note": "The Provider keeps deliverables until year end and may reuse work containing Client materials for other customers."
+    }
+  ]
+}

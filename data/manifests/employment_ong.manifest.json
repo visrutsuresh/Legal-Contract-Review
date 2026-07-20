@@ -1,0 +1,56 @@
+{
+  "file": "employment_ong.docx",
+  "contract_type": "employment",
+  "planted": [
+    {
+      "id": "emp-bonus-guaranteed",
+      "number": "3",
+      "clause_type": "payment",
+      "heading": "Salary and Benefits",
+      "severity": "medium",
+      "inspector": "financial",
+      "note": "A guaranteed bonus of six months of salary regardless of performance."
+    },
+    {
+      "id": "emp-probation-12m",
+      "number": "4",
+      "clause_type": "other",
+      "heading": "Probation",
+      "severity": "medium",
+      "inspector": "compliance",
+      "note": "Probation stretched to twelve months with dismissal allowed with no notice at all."
+    },
+    {
+      "id": "emp-term-oneway",
+      "number": "5",
+      "clause_type": "term_termination",
+      "heading": "Termination",
+      "severity": "medium",
+      "inspector": "risk",
+      "note": "The Employer may dismiss without notice while the Employee owes six months notice to resign."
+    },
+    {
+      "id": "emp-ip-moonlight",
+      "number": "7",
+      "clause_type": "ip",
+      "heading": "Intellectual Property",
+      "severity": "medium",
+      "inspector": "template",
+      "note": "The Employer claims IP in everything created during employment, even private work off the clock."
+    },
+    {
+      "id": "emp-restraint-2y",
+      "number": "8",
+      "clause_type": "restraint",
+      "heading": "Non-Solicitation",
+      "severity": "high",
+      "inspector": "compliance",
+      "note": "Worldwide two-year non-compete plus a total contact ban."
+    },
+    {
+      "missing": true,
+      "clause_type": "data_protection",
+      "heading": "Personal Data"
+    }
+  ]
+}

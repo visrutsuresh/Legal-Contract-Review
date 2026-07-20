@@ -1,0 +1,56 @@
+{
+  "file": "msa_cobalt.docx",
+  "contract_type": "msa",
+  "planted": [
+    {
+      "id": "msa-pay-interest8",
+      "number": "3",
+      "clause_type": "payment",
+      "heading": "Fees and Payment",
+      "severity": "medium",
+      "inspector": "financial",
+      "note": "Late interest raised to eight percent per month, compounded, running from the invoice date."
+    },
+    {
+      "id": "msa-term-oneway",
+      "number": "4",
+      "clause_type": "term_termination",
+      "heading": "Term and Termination",
+      "severity": "medium",
+      "inspector": "risk",
+      "note": "Exit rights one-sided: the Provider may leave on 7 days notice while the Client is locked in."
+    },
+    {
+      "id": "msa-conf-oneway",
+      "number": "5",
+      "clause_type": "confidentiality",
+      "heading": "Confidentiality",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "One-way confidentiality: the Client's information gets no protection."
+    },
+    {
+      "id": "msa-restraint-noncompete",
+      "number": "9",
+      "clause_type": "restraint",
+      "heading": "Non-Solicitation",
+      "severity": "high",
+      "inspector": "compliance",
+      "note": "Two-year non-compete blocking the Client from similar providers and from hiring anyone connected to the Provider."
+    },
+    {
+      "missing": true,
+      "clause_type": "data_protection",
+      "heading": "Data Protection"
+    },
+    {
+      "id": "msa-warranty-asis",
+      "number": "10",
+      "clause_type": "other",
+      "heading": "Service Warranty",
+      "severity": "medium",
+      "inspector": "template",
+      "note": "The skill-and-care warranty is replaced by an as-is disclaimer."
+    }
+  ]
+}

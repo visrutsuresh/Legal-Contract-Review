@@ -1,0 +1,51 @@
+{
+  "file": "nda_meridian.docx",
+  "contract_type": "nda",
+  "planted": [
+    {
+      "id": "nda-scope-oneway",
+      "number": "2",
+      "clause_type": "scope",
+      "heading": "Confidential Information",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "One-way definition: only the counterparty's information is protected, ours is not."
+    },
+    {
+      "id": "nda-compelled-nonotice",
+      "number": "4",
+      "clause_type": "confidentiality",
+      "heading": "Compelled Disclosure",
+      "severity": "low",
+      "inspector": "compliance",
+      "note": "Compelled disclosure allowed without notifying us first."
+    },
+    {
+      "id": "nda-conf-perpetual",
+      "number": "5",
+      "clause_type": "term_termination",
+      "heading": "Term and Survival",
+      "severity": "medium",
+      "inspector": "template",
+      "note": "Survival changed from the standard three years to perpetual."
+    },
+    {
+      "id": "nda-dp-overseas",
+      "number": "9",
+      "clause_type": "data_protection",
+      "heading": "Data Protection",
+      "severity": "high",
+      "inspector": "compliance",
+      "note": "Personal data may go to any affiliate in any country, with no consent or safeguards."
+    },
+    {
+      "id": "nda-gov-offshore",
+      "number": "10",
+      "clause_type": "governing_law",
+      "heading": "Governing Law",
+      "severity": "medium",
+      "inspector": "compliance",
+      "note": "Governing law moved from Singapore to the Cayman Islands."
+    }
+  ]
+}

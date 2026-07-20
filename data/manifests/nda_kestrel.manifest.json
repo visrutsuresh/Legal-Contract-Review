@@ -1,0 +1,51 @@
+{
+  "file": "nda_kestrel.docx",
+  "contract_type": "nda",
+  "planted": [
+    {
+      "id": "nda-conf-carveout",
+      "number": "3",
+      "clause_type": "confidentiality",
+      "heading": "Obligations of Confidentiality",
+      "severity": "high",
+      "inspector": "compliance",
+      "note": "Our information may be passed to any contractor or affiliate with no confidentiality undertakings."
+    },
+    {
+      "id": "nda-ip-grab",
+      "number": "6",
+      "clause_type": "ip",
+      "heading": "No Licence",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "Receiving our information grants a perpetual licence to use it for any purpose."
+    },
+    {
+      "id": "nda-return-keep",
+      "number": "7",
+      "clause_type": "confidentiality",
+      "heading": "Return or Destruction",
+      "severity": "medium",
+      "inspector": "template",
+      "note": "The counterparty may keep all our information forever instead of returning or destroying it."
+    },
+    {
+      "id": "nda-liq-damages",
+      "number": "8",
+      "clause_type": "liability",
+      "heading": "Remedies",
+      "severity": "high",
+      "inspector": "financial",
+      "note": "A fixed S$500,000 penalty per disclosure replaces the standard remedies clause."
+    },
+    {
+      "id": "nda-notices-fax",
+      "number": "11",
+      "clause_type": "notices",
+      "heading": "Notices",
+      "severity": "low",
+      "inspector": "template",
+      "note": "Notices are valid only by fax, a channel the firm does not use."
+    }
+  ]
+}
