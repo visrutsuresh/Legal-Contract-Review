@@ -19,7 +19,7 @@ cache = modal.Volume.from_name("hf-cache", create_if_missing=True)
     gpu=["L40S", "A100-40GB", "A100-80GB"],
     volumes={"/cache": cache},
     timeout=300,
-    scaledown_window=300,
+    scaledown_window=900,  # stay warm 15 idle min; cold start is 4-6 min so re-warming mid-session hurts
     secrets=[modal.Secret.from_name("llm-lane-token")],
 )
 class LLM:
