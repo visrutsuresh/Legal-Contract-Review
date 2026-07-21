@@ -120,11 +120,7 @@ def _clause_sheet(state: dict) -> str:
 def _inspector_context(state: dict) -> str:
     meta = state.get("meta", {})
     parties = ", ".join(meta.get("parties", [])) or "unknown"
-    return (
-        f"Contract type: {meta.get('contract_type', 'unknown')}\n"
-        f"Parties: {parties}\n"
-        f"Clauses (use these exact clause_id values):\n\n{_clause_sheet(state)}"
-    )
+    return f"Contract type: {meta.get('contract_type', 'unknown')}\nParties: {parties}\nClauses (use these exact clause_id values):\n\n{_clause_sheet(state)}"
 
 
 FINDING_RULES = """
@@ -188,7 +184,8 @@ def _add_note(update: dict, extra: str) -> None:
     rep["note"] = f"{rep['note']}; {extra}" if rep["note"] else extra
 
 
-COMPLIANCE_SYSTEM = """
+COMPLIANCE_SYSTEM = (
+    """
 You are the Compliance inspector in a legal contract review pipeline.
 Your job: find every clause that breaks the firm's rules pack.
 Work in this order: call rules_read first, then check every clause against every rule.
@@ -203,7 +200,9 @@ Reply every turn with ONE JSON object, nothing else.
   To use a tool: {"thought": "...", "action": "rules_read", "args": {"contract_type": "<type>"}}
              or: {"thought": "...", "action": "precedent_search", "args": {"query": "<text>"}}
   To finish:     {"thought": "...", "action": "finish", "result": {"findings": [<finding>, ...]}}
-""" + FINDING_RULES
+"""
+    + FINDING_RULES
+)
 
 
 def compliance_agent(state: dict) -> dict:
@@ -211,7 +210,8 @@ def compliance_agent(state: dict) -> dict:
     return update
 
 
-RISK_SYSTEM = """
+RISK_SYSTEM = (
+    """
 You are the Risk inspector in a legal contract review pipeline.
 Your job: flag terms that expose our side to serious harm. Look hardest at:
 liability (missing or unlimited caps), indemnities that bind only us, termination rights,
@@ -228,7 +228,9 @@ Reply every turn with ONE JSON object, nothing else.
   To use a tool: {"thought": "...", "action": "precedent_search", "args": {"query": "<text>"}}
              or: {"thought": "...", "action": "template_fetch", "args": {"contract_type": "<type>"}}
   To finish:     {"thought": "...", "action": "finish", "result": {"findings": [<finding>, ...], "overall_note": "<ONE plain sentence on the contract's overall risk; optional>"}}
-""" + FINDING_RULES
+"""
+    + FINDING_RULES
+)
 
 
 def risk_agent(state: dict) -> dict:
@@ -239,7 +241,8 @@ def risk_agent(state: dict) -> dict:
     return update
 
 
-TEMPLATE_SYSTEM = """
+TEMPLATE_SYSTEM = (
+    """
 You are the Template inspector in a legal contract review pipeline.
 Your job: compare this contract against the firm's standard template of the same type.
 Call template_fetch FIRST; you cannot inspect without the standard. Then report two things:
@@ -257,7 +260,9 @@ Reply every turn with ONE JSON object, nothing else.
   To finish:       {"thought": "...", "action": "finish", "result": {"findings": [<finding>, ...], "missing": [{"clause_type": "confidentiality", "severity": "medium", "plain": "<ONE sentence a non-lawyer feels>", "term": "<the legal name of the missing clause>", "why_needed": "<what the standard clause protects>"}, ...]}}
 A missing entry needs clause_type, severity (high, medium or low, lowercase), plain, term, why_needed.
 Do not invent a clause_id for a clause that is not there.
-""" + FINDING_RULES
+"""
+    + FINDING_RULES
+)
 
 
 def template_agent(state: dict) -> dict:
@@ -276,7 +281,8 @@ def template_agent(state: dict) -> dict:
     return update
 
 
-FINANCIAL_SYSTEM = """
+FINANCIAL_SYSTEM = (
+    """
 You are the Financial inspector in a legal contract review pipeline.
 Your job: check every money term. Look at payment days, fees and fee increases,
 late-payment interest, penalties, liability caps as amounts, currency, and totals.
@@ -291,9 +297,143 @@ Do not repeat a tool call you already made.
 Reply every turn with ONE JSON object, nothing else.
   To use the tool: {"thought": "...", "action": "template_fetch", "args": {"contract_type": "<type>"}}
   To finish:       {"thought": "...", "action": "finish", "result": {"findings": [<finding>, ...]}}
-""" + FINDING_RULES
+"""
+    + FINDING_RULES
+)
 
 
 def financial_agent(state: dict) -> dict:
     update, _ = _run_inspector("financial", FINANCIAL_SYSTEM, state, ["template_fetch"])
     return update
+
+
+NEGOTIATION_SYSTEM = """
+You are the Negotiation agent for Papyrus, a legal contract review product.
+Your input is ONLY the clauses our four inspectors flagged, each with its pinned
+findings, plus the list of standard clauses this contract is missing. Clean
+clauses are not shown to you. Write exactly ONE replacement wording per flagged
+clause that fixes ALL of that clause's findings at once, and a negotiation
+stance (ask, fallback, walk-away) per issue.
+
+Tools available:
+  template_fetch(contract_type) -> our standard clause set for this contract type, with standard wording per clause
+  precedent_search(query)       -> similar clauses from contracts we reviewed before
+Do not repeat a tool call you already made. Fetch the template once if you need
+standard wording, search precedent at most twice, then finish.
+
+Reply every turn with ONE JSON object, nothing else.
+  To use a tool:
+    {"thought": "...", "action": "template_fetch", "args": {"contract_type": "nda"}}
+    {"thought": "...", "action": "precedent_search", "args": {"query": "<clause text or issue>"}}
+  To finish:
+    {"thought": "...", "action": "finish", "result": {
+      "proposals": [
+        {"clause_id": "c04",
+         "new_text": "<the complete replacement clause, ready to paste>",
+         "del_span": "<the exact words your rewrite removes from the original>",
+         "ins_span": "<the exact words your rewrite adds>",
+         "based_on": ["<finding_id>", "..."]}
+      ],
+      "negotiation_points": [
+        {"clause_id": "c04",
+         "ask": "<what we want them to agree to>",
+         "fallback": "<the middle ground we can accept>",
+         "walk_away": "<the line we will not cross>"}
+      ]}}
+
+Rules:
+  Exactly ONE proposal per flagged clause. If a clause has three findings, one rewrite fixes all three.
+  new_text keeps the clause's structure and defined terms; change only what the findings require. Keep it under 120 words.
+  based_on lists the finding_ids the rewrite addresses; never invent a finding_id.
+  Never propose a rewrite for a clause that is not in your input.
+  For each missing standard clause, add ONE negotiation_points entry whose ask is to add that clause. No proposal for it.
+"""
+
+
+def _issue_context(clauses: list, missing_clauses: list) -> str:
+    lines = ["Flagged clauses and their findings:"]
+    for c in clauses:
+        if not c.get("findings"):
+            continue
+        lines.append(f"\nClause {c['clause_id']} (no. {c.get('number', '?')}, {c.get('heading', '')}):")
+        lines.append(f"  text: {c['text']}")
+        for f in c["findings"]:
+            hint = f", fix_hint: {f['fix_hint']}" if f.get("fix_hint") else ""
+            lines.append(f'  finding {f.get("finding_id", "?")} [{f["inspector"]}, {f["severity"]}]: {f["term"]} | evidence: "{f["evidence"]}" | change: {f["change"]}{hint}')
+    if missing_clauses:
+        lines.append("\nMissing standard clauses:")
+        for m in missing_clauses:
+            lines.append(f"  {m.get('clause_type', '?')}: {m.get('term') or m.get('plain', '')}")
+    return "\n".join(lines)
+
+
+def negotiation_agent(clauses: list, missing_clauses: list) -> dict:
+    result = react(NEGOTIATION_SYSTEM, _issue_context(clauses, missing_clauses), ["template_fetch", "precedent_search"])
+    flagged_ids = {c["clause_id"] for c in clauses if c.get("findings")}
+    proposals = {}
+    for p in result.get("proposals", []):
+        cid = p.get("clause_id")
+        if cid not in flagged_ids or not p.get("new_text"):
+            continue  # never rewrite a clause the inspectors did not flag
+        if cid in proposals:
+            continue  # one proposal per clause, the first wins (D36)
+        proposals[cid] = {
+            "clause_id": cid,
+            "new_text": p["new_text"],
+            "del_span": p.get("del_span", ""),
+            "ins_span": p.get("ins_span", ""),
+            "based_on": p.get("based_on", []),
+        }
+    merged = []
+    for c in clauses:
+        c = dict(c)
+        c["proposal"] = proposals.get(c["clause_id"])
+        if not c.get("final_text"):
+            c["final_text"] = c["text"]  # their wording stands until the lawyer decides
+        merged.append(c)
+    points = [p for p in result.get("negotiation_points", []) if p.get("ask")]
+    return {"clauses": merged, "negotiation_points": points}
+
+
+INSPECTOR_PLAIN = {
+    "compliance": "the policy-rules check",
+    "risk": "the risk check",
+    "template": "the standard-terms comparison",
+    "financial": "the money-terms check",
+}
+
+
+def summary_counts(clauses: list, missing_clauses: list) -> dict:
+    findings = [f for c in clauses for f in c.get("findings", [])]
+    sevs = [f["severity"] for f in findings] + [m.get("severity") for m in missing_clauses]
+    return {
+        "clauses": len(clauses),
+        "flagged": sum(1 for c in clauses if c.get("findings")),
+        "proposals": sum(1 for c in clauses if c.get("proposal")),
+        "high": sevs.count("high"),
+        "medium": sevs.count("medium"),
+        "low": sevs.count("low"),
+        "missing": len(missing_clauses),
+    }
+
+
+def summary_agent(meta: dict, clauses: list, missing_clauses: list, contract_risk: dict, inspector_reports: list) -> dict:
+    counts = summary_counts(clauses, missing_clauses)
+    failed = sorted({r["inspector"] for r in inspector_reports if r.get("status") == "failed"})
+    worst = [f"{c.get('heading') or c['clause_id']}: {f['plain']}" for c in clauses for f in c.get("findings", []) if f["severity"] == "high"][:4]
+    prompt = (
+        "You are writing the executive summary of a contract review for Papyrus.\n"
+        "Write ONE paragraph (4-6 sentences) a non-lawyer can read. Plain words, no legal\n"
+        "jargon, no bullet points, no headings. Say what kind of contract it is, who the\n"
+        "parties are, the overall risk level and why, and what the reader should look at first.\n"
+        "Do not mention any checks that failed; that disclosure is added separately.\n"
+        f"Contract type: {meta.get('contract_type', 'unknown')}. Parties: {', '.join(meta.get('parties', [])) or 'unknown'}.\n"
+        f"Overall risk: {contract_risk.get('level', 'unknown')} ({contract_risk.get('why', '')}).\n"
+        f"Counts: {counts}.\n"
+        f"Most serious issues: {worst or 'none'}.\n"
+        "Reply with the paragraph only, no JSON."
+    )
+    executive = router.call_model(prompt, max_new_tokens=400).strip()
+    for name in failed:
+        executive += f" Note: {INSPECTOR_PLAIN.get(name, name)} did not finish, so its part of the review is missing."
+    return {"executive": executive, "counts": counts}
