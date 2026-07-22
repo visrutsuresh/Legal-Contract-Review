@@ -95,7 +95,6 @@ There is **no open signup**. The admin creates every account from the People pag
 
 **Terminal 1 — backend**
 ```bash
-export NO_PROXY=127.0.0.1,localhost no_grpc_proxy=127.0.0.1,localhost   # see the proxy note below
 uv run uvicorn api:app --reload          # http://localhost:8000
 ```
 
