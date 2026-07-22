@@ -1,7 +1,7 @@
 import weaviate
 from fastembed import TextEmbedding
 from weaviate.classes.config import DataType, Property
-from weaviate.classes.query import MetadataQuery
+from weaviate.classes.query import Filter, MetadataQuery
 
 COLLECTION = "Precedent"
 RELEVANCE_FLOOR = 60  # below this, a hit is off-topic noise, not precedent
@@ -51,14 +51,28 @@ def search(query: str, k: int = 5) -> list[dict]:
         client.close()
 
 
-def index_reviewed(title: str, content: str) -> None:
-    # file one finished review into the cabinet so future reviews can find it
+def index_reviewed(title: str, content: str, source: str = "review") -> None:
+    # file one finished review into the cabinet so future reviews can find it.
+    # source "review" is a real contract a lawyer signed off; "seed" is the
+    # starter set from seed_precedent.py. Only the seed is ever bulk-deleted.
     client = weaviate.connect_to_local(port=8081, grpc_port=50052)
     try:
         col = client.collections.get(COLLECTION)
         col.data.insert(
-            properties={"title": title, "content": content, "source": "review"},
+            properties={"title": title, "content": content, "source": source},
             vector=embed(title + ". " + content),
         )
+    finally:
+        client.close()
+
+
+def clear_seeded() -> int:
+    # drop ONLY the seeded rows, never a real filed review: re-running the
+    # seed script must not throw away precedent a lawyer actually created
+    client = weaviate.connect_to_local(port=8081, grpc_port=50052)
+    try:
+        col = client.collections.get(COLLECTION)
+        res = col.data.delete_many(where=Filter.by_property("source").equal("seed"))
+        return res.successful
     finally:
         client.close()
