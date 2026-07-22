@@ -171,40 +171,6 @@ def decide(contract_id: str, clause_id: str, payload: DecisionIn, user: User = D
     updated = store.decide_clause(contract_id, clause_id, payload.verdict, final_text)
     if updated is None:
         raise HTTPException(status_code=404, detail="clause not found")
-    return {"contract_id": contract_id, "clause": updated}VERDICTS = ("accepted", "rejected", "edited")
-
-
-class DecisionIn(BaseModel):
-    verdict: str
-    edited_text: str | None = None
-
-
-@app.post("/contracts/{contract_id}/clauses/{clause_id}/decision")
-def decide(contract_id: str, clause_id: str, payload: DecisionIn, user: User = Depends(require_lawyer)):
-    if payload.verdict not in VERDICTS:
-        raise HTTPException(status_code=422, detail="verdict must be accepted, rejected, or edited")
-    if payload.verdict == "edited" and not (payload.edited_text or "").strip():
-        raise HTTPException(status_code=422, detail="edited needs edited_text: the wording you want instead")
-    state = store.get(contract_id)
-    if state is None:
-        raise HTTPException(status_code=404, detail="contract not found")
-    if state.get("status") == "reviewed":
-        raise HTTPException(status_code=409, detail="this review is already finished")
-    clause = next((c for c in state.get("clauses", []) if c.get("clause_id") == clause_id), None)
-    if clause is None:
-        raise HTTPException(status_code=404, detail="clause not found")
-    if payload.verdict == "accepted":
-        new_text = (clause.get("proposal") or {}).get("new_text")
-        if not new_text:
-            raise HTTPException(status_code=422, detail="this clause has no proposal to accept")
-        final_text = new_text
-    elif payload.verdict == "rejected":
-        final_text = clause.get("text", "")
-    else:
-        final_text = payload.edited_text.strip()
-    updated = store.decide_clause(contract_id, clause_id, payload.verdict, final_text)
-    if updated is None:
-        raise HTTPException(status_code=404, detail="clause not found")
     return {"contract_id": contract_id, "clause": updated}
 
 def _assemble(clauses: list) -> str:
