@@ -5,7 +5,7 @@ import { api } from "./api";
 export type User = {
   id: string;
   email: string;
-  role: "customer" | "staff" | "admin";
+  role: "lawyer" | "admin";
 };
 
 export function useUser() {
@@ -28,14 +28,6 @@ export async function login(email: string, password: string) {
     body: new URLSearchParams({ username: email, password }),
   });
   if (!res.ok) throw new Error("Wrong email or password");
-}
-
-export async function register(email: string, password: string) {
-  await api("/auth/register", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-  await login(email, password); // new account goes straight in, no second form
 }
 
 export async function logout() {

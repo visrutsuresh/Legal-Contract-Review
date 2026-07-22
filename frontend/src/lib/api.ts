@@ -1,4 +1,4 @@
-const BASE = "http://localhost:8000";
+const BASE = "http://localhost:8000"; // Papyrus's backend port (Task 31 runs uvicorn here)
 
 export async function api(path: string, init: RequestInit = {}) {
   const res = await fetch(`${BASE}${path}`, {
