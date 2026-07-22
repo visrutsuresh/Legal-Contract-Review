@@ -10,7 +10,7 @@ from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from app import precedent, store
+from app import audit, precedent, store
 from app.graph import PENDING_FILES, graph, initial_state, submit
 from app.schemas import UserCreate, UserUpdate
 from app.users import (
@@ -136,6 +136,28 @@ def get_contract(contract_id: str, user: User = Depends(require_lawyer)):
     if state is None:
         raise HTTPException(status_code=404, detail="contract not found")
     return state
+
+
+@app.get("/contracts/{contract_id}/audit")
+def get_audit(contract_id: str, user: User = Depends(require_lawyer)):
+    # the tamper-evident trail. Every node's step was hash-chained into the
+    # state by the `chain` reducer as the review ran; verify() re-walks the
+    # chain and reports the FIRST entry whose hash no longer follows from the
+    # one before it, which is what an edit straight into the JSONB blob looks
+    # like. A legal review has to be able to prove it was not quietly altered.
+    state = store.get(contract_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="contract not found")
+    log = state.get("audit") or []
+    broken_at = audit.verify(log)
+    return {
+        "contract_id": contract_id,
+        "entries": log,
+        "count": len(log),
+        "intact": broken_at == -1,
+        "broken_at": None if broken_at == -1 else broken_at,
+    }
+
 
 VERDICTS = ("accepted", "rejected", "edited")
 

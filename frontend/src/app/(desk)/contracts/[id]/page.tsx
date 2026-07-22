@@ -99,6 +99,83 @@ function Diff({ c }: { c: Clause }) {
   );
 }
 
+type Audit = {
+  entries: { step: string; prev: string; hash: string }[];
+  count: number;
+  intact: boolean;
+  broken_at: number | null;
+};
+
+// the trail is long and nobody reads it every visit, so it stays shut and
+// only fetches when asked. The verdict line is the point: a lawyer needs to
+// be able to show this review was not quietly edited after it was signed.
+function AuditTrail({ id }: { id: string }) {
+  const [open, setOpen] = useState(false);
+  const [a, setA] = useState<Audit | null>(null);
+  const [err, setErr] = useState("");
+
+  function toggle() {
+    setOpen((o) => !o);
+    if (!a && !err)
+      api(`/contracts/${id}/audit`)
+        .then(setA)
+        .catch((e) => setErr(String(e)));
+  }
+
+  return (
+    <div className="mt-10">
+      <button
+        onClick={toggle}
+        className="text-[13px] font-semibold text-[var(--accent)] underline underline-offset-4"
+      >
+        {open ? "Hide the audit trail" : "Show the audit trail"}
+      </button>
+      {open && (
+        <div className="panel p-6 mt-3 max-w-[80ch]">
+          {err && <p className="text-[var(--rust)] text-[13px]">{err}</p>}
+          {!a && !err && (
+            <p className="text-[var(--ink-soft)] text-[13px]">Loading…</p>
+          )}
+          {a && (
+            <>
+              <div
+                className={`text-[13px] font-semibold mb-4 ${a.intact ? "text-[var(--olive)]" : "text-[var(--rust)]"}`}
+              >
+                {a.intact
+                  ? `Verified intact · ${a.count} step${a.count === 1 ? "" : "s"}, each one hash-linked to the one before it.`
+                  : `Tampered. Entry ${a.broken_at} no longer follows from the one before it; treat everything after it as unreliable.`}
+              </div>
+              <ol className="text-[13px]">
+                {a.entries.map((e, i) => (
+                  <li
+                    key={i}
+                    className={`flex gap-3 py-1.5 border-b border-[var(--line)] last:border-0 ${
+                      a.broken_at !== null && i >= a.broken_at
+                        ? "text-[var(--rust)]"
+                        : ""
+                    }`}
+                  >
+                    <span className="font-array text-[11px] text-[var(--ink-soft)] w-6 shrink-0 pt-0.5">
+                      {i + 1}
+                    </span>
+                    <span className="flex-1">{e.step}</span>
+                    <span
+                      className="font-array text-[11px] text-[var(--ink-soft)] shrink-0 pt-0.5"
+                      title={e.hash}
+                    >
+                      {e.hash.slice(0, 8)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Review() {
   const { id } = useParams<{ id: string }>();
   const [s, setS] = useState<Detail | null>(null);
@@ -235,6 +312,7 @@ export default function Review() {
         </div>
         <div className="label mb-2">Final redlined document</div>
         <pre className="doc max-w-[80ch]">{doc}</pre>
+        <AuditTrail id={id} />
       </main>
     );
   }
@@ -501,6 +579,7 @@ export default function Review() {
           })}
         </div>
       </div>
+      <AuditTrail id={id} />
     </main>
   );
 }
