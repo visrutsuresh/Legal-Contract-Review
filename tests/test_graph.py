@@ -63,6 +63,10 @@ def test_invalid_findings_are_dropped():
     by_id = {c["clause_id"]: c for c in out["clauses"]}
     assert len(by_id["c01"]["findings"]) == 1
     assert "1 findings pinned, 4 dropped" in out["audit"][0]
+    # the two bare non-dicts have no clause to land on, so they count as unknown;
+    # only the two malformed dicts are "incomplete". The split is the whole point
+    # of the counters, so assert it rather than just the total.
+    assert "(2 incomplete, 2 unknown clause)" in out["audit"][0]
 
 
 def test_findings_for_an_unknown_clause_are_dropped():
@@ -71,6 +75,9 @@ def test_findings_for_an_unknown_clause_are_dropped():
     out = fan_in(_state([_finding("c99"), _finding(None), _finding("c01")]))
     assert sum(len(c["findings"]) for c in out["clauses"]) == 1
     assert "1 findings pinned, 2 dropped" in out["audit"][0]
+    # both are well-formed findings citing a clause that does not exist here,
+    # which is a prompt problem, not a schema one
+    assert "(0 incomplete, 2 unknown clause)" in out["audit"][0]
 
 
 def test_fan_in_clears_any_findings_already_on_the_clauses():

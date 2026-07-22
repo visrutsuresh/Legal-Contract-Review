@@ -1,6 +1,7 @@
 import os
 import threading
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
@@ -27,7 +28,17 @@ from app.users import (
 
 store.init_db()  # make sure the contracts table exists when the API boots
 
-app = FastAPI(title="Papyrus Contract Review API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_user_table()
+    try:
+        precedent.ensure_collection()  # label the Weaviate drawer (Task 29) on a fresh machine
+    except Exception as e:
+        print(f"[precedent] ensure_collection failed (Weaviate down?): {e}", flush=True)
+    yield  # everything before the yield is startup; nothing to tear down after
+
+
+app = FastAPI(title="Papyrus Contract Review API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,15 +50,6 @@ app.add_middleware(
 
 app.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth", tags=["auth"])
 # no register router on purpose: accounts exist only when an admin creates them (see the /users routes)
-
-
-@app.on_event("startup")
-async def _startup():
-    await create_user_table()
-    try:
-        precedent.ensure_collection()  # label the Weaviate drawer (Task 29) on a fresh machine
-    except Exception as e:
-        print(f"[precedent] ensure_collection failed (Weaviate down?): {e}", flush=True)
 
 
 @app.get("/")

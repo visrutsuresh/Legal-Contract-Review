@@ -195,11 +195,19 @@ def fan_in(state: ContractState) -> dict:
         c["findings"] = []
         clauses.append(c)
         by_id[c["clause_id"]] = c
-    kept = dropped = 0
+    kept = incomplete = unknown = 0
     for f in state["findings_raw"]:
         target = by_id.get(f.get("clause_id")) if isinstance(f, dict) else None
-        if target is None or not valid_finding(f):
-            dropped += 1  # half-formed findings are never shown (D34c)
+        # counted apart because they mean different things: "unknown" is an
+        # inspector citing a clause_id this contract does not have (it invented
+        # one, or extraction renumbered), "incomplete" is a finding missing a
+        # required field. One is a prompt problem, the other a schema problem,
+        # and the audit line is the only place that difference is visible.
+        if target is None:
+            unknown += 1
+            continue
+        if not valid_finding(f):
+            incomplete += 1  # half-formed findings are never shown (D34c)
             continue
         target["findings"].append(f)
         kept += 1
@@ -211,7 +219,10 @@ def fan_in(state: ContractState) -> dict:
         "missing_clauses": missing,
         "contract_risk": risk_rollup(clauses, missing),
         "stage": "negotiating",
-        "audit": [f"fan-in: {kept} findings pinned, {dropped} dropped, checks {checks}"],
+        "audit": [
+            f"fan-in: {kept} findings pinned, {incomplete + unknown} dropped "
+            f"({incomplete} incomplete, {unknown} unknown clause), checks {checks}"
+        ],
     }
 
 

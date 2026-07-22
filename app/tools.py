@@ -5,8 +5,13 @@ from app import precedent
 
 TOOLS = {}  # name -> function
 
-TEMPLATE_DIR = Path("data/templates")
-RULES_FILE = Path("policy_rules.md")
+# anchored to this file, NOT the working directory: run_tool swallows every
+# exception into an "ERROR: ..." string the agent reads as a normal observation,
+# so a bad relative path would not crash, it would quietly tell all four
+# inspectors the rules pack and the templates do not exist
+REPO_ROOT = Path(__file__).resolve().parent.parent
+TEMPLATE_DIR = REPO_ROOT / "data" / "templates"
+RULES_FILE = REPO_ROOT / "policy_rules.md"
 
 
 def tool(fn):
