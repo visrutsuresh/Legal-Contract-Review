@@ -16,13 +16,17 @@ def react(system: str, context: str, allowed_tools: list[str], max_steps: int = 
     transcript, cache, redundant = "", {}, 0
     for step in range(max_steps):
         must_finish = redundant >= 2 or step >= max_steps - 1
-        hint = "\nSTOP calling tools. Reply ONLY with the finish JSON." if must_finish else ""
-        move = _parse(router.think(f"{system}\n\n{context}\n{transcript}{hint}\nYour JSON:"))
+        # the second sentence matters: small models spot issues in mid-loop thoughts
+        # and then forget them at finish time unless told to carry them over
+        hint = "\nSTOP calling tools. Reply ONLY with the finish JSON. Include every issue you already identified in your thoughts above as findings." if must_finish else ""
+        # 1024 default truncated multi-finding finish JSON mid-string; 4096 matches extraction
+        move = _parse(router.think(f"{system}\n\n{context}\n{transcript}{hint}\nYour JSON:", max_new_tokens=4096))
         action = move.get("action")
         if action == "finish":
             return move.get("result", {})
         if action not in allowed_tools:
-            transcript += f"\nunknown action {action!r}"
+            # name the real options: a lost model otherwise invents the same tool forever
+            transcript += f"\nunknown action {action!r}; your only actions are {allowed_tools} or finish"
             continue
         args = move.get("args", {}) or {}
         key = f"{action}:{json.dumps(args, sort_keys=True)}"

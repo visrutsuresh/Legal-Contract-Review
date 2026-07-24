@@ -145,6 +145,12 @@ Field rules (a finding missing any of these is thrown away unseen):
   fix_hint:  the wording or number the fix should move to, or null. The ONLY optional field.
 Severity guide: high = money or the whole deal at risk, medium = a real but survivable cost, low = untidy but harmless.
 Flag only what you can quote evidence for. An empty findings list is a valid answer.
+Work method, follow it exactly:
+  1. Make the tool call you need FIRST (at most two tool calls in total).
+  2. Then sweep the contract clause by clause, c01 to the last one. Late clauses hide
+     issues as often as early ones; a sweep that stops halfway is a failed inspection.
+  3. Then finish with a finding for EVERY issue you noted, including issues you only
+     mentioned in an earlier thought. Do not stop after the first one or two findings.
 """
 
 
@@ -288,6 +294,9 @@ Your job: check every money term. Look at payment days, fees and fee increases,
 late-payment interest, penalties, liability caps as amounts, currency, and totals.
 Do the arithmetic yourself inside your thought (for example 3 years x 12 months x monthly fee)
 and flag numbers that do not add up or that hurt us.
+A contract with no payment schedule can still hide money terms: fixed penalties,
+liquidated damages, indemnity amounts, late-payment interest. If ANY clause names a sum
+of money, inspect that clause; never conclude "no financial terms" while a number is in view.
 Use template_fetch to see the firm's standard money terms for this contract type.
 
 Tool available:

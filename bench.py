@@ -28,10 +28,12 @@ if "--only" in sys.argv:
     ONLY = sys.argv[i + 1] if len(sys.argv) > i + 1 else None
 MODE = f"only={ONLY}" if ONLY else "full"
 
-# Hard per-contract wall-clock cap. Nine nodes each with their own 240s guard and
+# Hard per-contract wall-clock cap. Nine nodes each with their own 600s guard and
 # a retry can outlive any single node timeout, so the batch needs its own ceiling:
 # a hung contract is abandoned, logged ERROR, and the remaining ones still run.
-CONTRACT_TIMEOUT_S = 900
+# Inspector calls serialize on the one warm container at ~2-3 min each, so a full
+# pipeline pass genuinely needs ~20 min; 900 was killing healthy runs.
+CONTRACT_TIMEOUT_S = 2700
 
 
 # --- pure scoring (no graph, no network — smoke-testable on a fabricated state) ---

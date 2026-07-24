@@ -1,6 +1,9 @@
 import modal  # type:ignore
 
-MODEL = "Qwen/Qwen3-30B-A3B"
+# Qwen3-30B-A3B abandoned 2026-07-24: its 4-6 min load could never fit a request
+# window (cold calls died at every timeout ceiling) and it forced $2/hr 40GB+ cards.
+# Same recipe as the sibling project's proven review lane: 14B 4-bit loads in ~60s on a $1/hr A10G.
+MODEL = "Qwen/Qwen2.5-14B-Instruct"
 
 app = modal.App("papyrus-private-llm")
 
@@ -14,12 +17,11 @@ cache = modal.Volume.from_name("hf-cache", create_if_missing=True)
 
 @app.cls(
     image=image,
-    # 4-bit Qwen3-30B-A3B measured ~22GB+ at load; A10G (24GB) OOMs. Preference list:
-    # whichever 40GB+ card Modal has capacity for right now serves the request.
-    gpu=["L40S", "A100-40GB", "A100-80GB"],
+    gpu="A10G",  # 14B 4-bit is ~9GB, fits with room for long-context KV
     volumes={"/cache": cache},
-    timeout=300,
-    scaledown_window=900,  # stay warm 15 idle min; cold start is 4-6 min so re-warming mid-session hurts
+    timeout=600,  # ~60s load + one long generation, with slack
+    scaledown_window=300,  # 5 warm minutes; re-warming costs ~60s, not 5 min
+    max_containers=1,  # parallel inspectors queue on one GPU instead of autoscaling a second bill
     secrets=[modal.Secret.from_name("llm-lane-token")],
 )
 class LLM:
@@ -54,7 +56,7 @@ class LLM:
         max_new_tokens = data.get("max_new_tokens", 512)
 
         messages = [{"role": "user", "content": prompt}]
-        text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, enable_thinking=False)
+        text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         inputs = self.tokenizer(text, return_tensors="pt").to("cuda")
         output = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
         new_tokens = output[0][inputs.input_ids.shape[1] :]

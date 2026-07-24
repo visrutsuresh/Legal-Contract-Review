@@ -56,7 +56,9 @@ def _stage(state: ContractState, stage: str) -> None:
 # --- the guard --------------------------------------------------------------
 
 
-def guarded(fn, name: str, timeout_s: int = 240):
+# the lane serializes on one GPU, so a parallel inspector's wall-clock includes
+# every call queued ahead of it; 1200 fits four inspectors at ~2-3 min each
+def guarded(fn, name: str, timeout_s: int = 1200):
     """Wall-clock cap plus one retry around a node. Inspectors degrade on a
     double failure; spine nodes stamp status=error. The graph never crashes."""
 
