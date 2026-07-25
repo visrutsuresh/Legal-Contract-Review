@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, BASE } from "@/lib/api";
 import { STAGE_LINES } from "@/lib/stages";
 
 type Finding = {
@@ -43,6 +43,7 @@ type Detail = {
   filename: string;
   status: string;
   stage?: string;
+  source_format?: string;
   clauses?: Clause[];
   missing_clauses?: Finding[];
   inspector_reports?: { inspector: string; status: string; note?: string }[];
@@ -229,6 +230,29 @@ export default function Review() {
     }
   }
 
+  async function downloadDocx() {
+    setNote("");
+    try {
+      const res = await fetch(`${BASE}/contracts/${id}/export`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+      const missed = res.headers.get("X-Unmatched-Clauses");
+      if (missed)
+        setNote(
+          `Could not place the edit for ${missed} into the file; fix those clauses by hand.`,
+        );
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `reviewed-${s?.filename ?? id}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setNote(String(e));
+    }
+  }
+
   async function finish() {
     setBusy(true);
     setNote("");
@@ -312,6 +336,12 @@ export default function Review() {
         </div>
         <div className="label mb-2">Final redlined document</div>
         <pre className="doc max-w-[80ch]">{doc}</pre>
+        {s.source_format === "docx" && (
+          <button className="finish ready mt-4" onClick={downloadDocx}>
+            Download corrected .docx
+          </button>
+        )}
+        {note && <div className="story mt-2">{note}</div>}
         <AuditTrail id={id} />
       </main>
     );

@@ -4,14 +4,14 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_users.exceptions import UserAlreadyExists
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from app import audit, precedent, store
+from app import audit, export, precedent, store
 from app.graph import PENDING_FILES, graph, initial_state, submit
 from app.schemas import UserCreate, UserUpdate
 from app.users import (
@@ -76,6 +76,7 @@ async def upload_contract(
         raise HTTPException(status_code=400, detail="empty file")
     contract_id = f"P-{uuid.uuid4().hex[:8]}"
     store.save_pending(contract_id, file.filename, datetime.now(timezone.utc))
+    store.save_file_bytes(contract_id, data)  # kept so export can rewrite the original in place
     background.add_task(_process, contract_id, file.filename, data)
     return {"contract_id": contract_id, "status": "processing"}
 
@@ -252,6 +253,38 @@ def finish_review(contract_id: str, user: User = Depends(require_lawyer)):
         print(f"[precedent] {contract_id} filing failed: {e}", flush=True)
 
     return {"status": "reviewed", "document": document, "counts": counts, "precedent_filed": filed}
+
+
+DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+@app.get("/contracts/{contract_id}/export")
+def export_contract(contract_id: str, user: User = Depends(require_lawyer)):
+    # the corrected contract in its original file format: identical everywhere
+    # except the clauses the lawyer changed
+    state = store.get(contract_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="contract not found")
+    if state.get("status") != "reviewed":
+        raise HTTPException(status_code=409, detail="finish the review first")
+    if state.get("source_format") != "docx":
+        # ponytail: pdf export would mean re-laying-out pages; docx covers the corpus
+        raise HTTPException(status_code=422, detail="export is only available for .docx uploads")
+    original = store.get_file_bytes(contract_id)
+    if original is None:
+        raise HTTPException(status_code=410, detail="the original file was not stored (uploaded before export existed): upload it again")
+    corrected, unmatched = export.export_docx(original, state.get("clauses", []))
+    filename = state.get("filename") or f"{contract_id}.docx"
+    return Response(
+        content=corrected,
+        media_type=DOCX_MIME,
+        headers={
+            "Content-Disposition": f'attachment; filename="reviewed-{filename}"',
+            # clauses whose original wording could not be located verbatim; their
+            # edits are NOT in the file, so the caller can warn instead of trusting it blindly
+            "X-Unmatched-Clauses": ",".join(unmatched),
+        },
+    )
 
 @app.get("/users/me")
 def who_am_i(user: User = Depends(current_user)):

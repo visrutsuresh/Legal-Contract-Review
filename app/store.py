@@ -31,6 +31,24 @@ def init_db():
         # fresh database. When this table needs a new column later, patch
         # existing databases right here with a line like:
         # conn.execute("ALTER TABLE contracts ADD COLUMN IF NOT EXISTS reviewer TEXT")
+        # the uploaded file itself, kept so export can rewrite it in place
+        conn.execute("ALTER TABLE contracts ADD COLUMN IF NOT EXISTS file_bytes BYTEA")
+
+
+def save_file_bytes(contract_id: str, data: bytes) -> None:
+    with _connect() as conn:
+        conn.execute(
+            "UPDATE contracts SET file_bytes=%s WHERE contract_id=%s",
+            (data, contract_id),
+        )
+
+
+def get_file_bytes(contract_id: str) -> bytes | None:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT file_bytes FROM contracts WHERE contract_id=%s", (contract_id,)
+        ).fetchone()
+    return bytes(row[0]) if row and row[0] is not None else None
 
 
 def save_pending(contract_id: str, filename: str, created_at) -> None:
