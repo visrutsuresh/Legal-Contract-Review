@@ -1,25 +1,412 @@
 {
-  "config": "only=kestrel",
+  "config": "full",
   "contract_timeout_s": 2700,
   "totals": {
-    "contracts": 1,
+    "contracts": 13,
     "errors": 0,
-    "extraction_ok": 1,
-    "planted": 5,
-    "found": 5,
-    "recall": 1.0,
-    "inspector_rate": 0.8,
-    "severity_rate": 0.8,
-    "findings_total": 13,
-    "unplanted_findings": 0,
-    "unplanted_rate": 0.0,
-    "missing_expected": 0,
-    "missing_found": 0,
-    "missing_reported": 1,
-    "avg_latency_s": 490.2,
-    "total_latency_s": 490.2
+    "extraction_ok": 13,
+    "planted": 40,
+    "found": 35,
+    "recall": 0.875,
+    "inspector_rate": 0.7142857142857143,
+    "severity_rate": 0.6285714285714286,
+    "findings_total": 109,
+    "unplanted_findings": 25,
+    "unplanted_rate": 0.22935779816513763,
+    "missing_expected": 3,
+    "missing_found": 3,
+    "missing_reported": 24,
+    "avg_latency_s": 429.0,
+    "total_latency_s": 5577.3
   },
   "rows": [
+    {
+      "file": "employment_ong.docx",
+      "contract_type": "employment",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 11,
+      "planted": 5,
+      "found": 5,
+      "recall": 1.0,
+      "inspector_ok": 4,
+      "inspector_rate": 0.8,
+      "severity_ok": 3,
+      "severity_rate": 0.6,
+      "findings_total": 13,
+      "unplanted_findings": 0,
+      "unplanted_rate": 0.0,
+      "missing_expected": 1,
+      "missing_found": 1,
+      "missing_reported": 1,
+      "risk_level": "high",
+      "latency_s": 562.0,
+      "detail": [
+        {
+          "id": "emp-bonus-guaranteed",
+          "number": "3",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "emp-probation-12m",
+          "number": "4",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "compliance",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "emp-term-oneway",
+          "number": "5",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "emp-ip-moonlight",
+          "number": "7",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": false,
+          "expected_inspector": "template",
+          "got_inspectors": [
+            "risk"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "emp-restraint-2y",
+          "number": "8",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "compliance",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "employment_raghavan.docx",
+      "contract_type": "employment",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 12,
+      "planted": 0,
+      "found": 0,
+      "recall": null,
+      "inspector_ok": 0,
+      "inspector_rate": null,
+      "severity_ok": 0,
+      "severity_rate": null,
+      "findings_total": 4,
+      "unplanted_findings": 4,
+      "unplanted_rate": 1.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 1,
+      "risk_level": "high",
+      "latency_s": 290.6,
+      "detail": []
+    },
+    {
+      "file": "msa_cobalt.docx",
+      "contract_type": "msa",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 13,
+      "planted": 5,
+      "found": 4,
+      "recall": 0.8,
+      "inspector_ok": 2,
+      "inspector_rate": 0.5,
+      "severity_ok": 3,
+      "severity_rate": 0.75,
+      "findings_total": 10,
+      "unplanted_findings": 0,
+      "unplanted_rate": 0.0,
+      "missing_expected": 1,
+      "missing_found": 1,
+      "missing_reported": 1,
+      "risk_level": "high",
+      "latency_s": 450.1,
+      "detail": [
+        {
+          "id": "msa-pay-interest8",
+          "number": "3",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "financial",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "low",
+            "medium"
+          ]
+        },
+        {
+          "id": "msa-term-oneway",
+          "number": "4",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "msa-conf-oneway",
+          "number": "5",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": true,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "compliance",
+            "template"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "msa-restraint-noncompete",
+          "number": "9",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "msa-warranty-asis",
+          "number": "10",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "template",
+          "got_inspectors": [],
+          "expected_severity": "medium",
+          "got_severities": []
+        }
+      ]
+    },
+    {
+      "file": "msa_novabright.docx",
+      "contract_type": "msa",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 14,
+      "planted": 5,
+      "found": 4,
+      "recall": 0.8,
+      "inspector_ok": 3,
+      "inspector_rate": 0.75,
+      "severity_ok": 2,
+      "severity_rate": 0.5,
+      "findings_total": 9,
+      "unplanted_findings": 0,
+      "unplanted_rate": 0.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 3,
+      "risk_level": "high",
+      "latency_s": 389.1,
+      "detail": [
+        {
+          "id": "msa-pay-net120",
+          "number": "3",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "msa-term-autorenew",
+          "number": "4",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "msa-ip-provider-owns",
+          "number": "6",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "template",
+          "got_inspectors": [],
+          "expected_severity": "high",
+          "got_severities": []
+        },
+        {
+          "id": "msa-liability-unlimited",
+          "number": "7",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "financial",
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "msa-dp-nobreach",
+          "number": "10",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": false,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "medium"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "msa_tembusu.docx",
+      "contract_type": "msa",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 14,
+      "planted": 0,
+      "found": 0,
+      "recall": null,
+      "inspector_ok": 0,
+      "inspector_rate": null,
+      "severity_ok": 0,
+      "severity_rate": null,
+      "findings_total": 7,
+      "unplanted_findings": 7,
+      "unplanted_rate": 1.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 0,
+      "risk_level": "high",
+      "latency_s": 678.8,
+      "detail": []
+    },
+    {
+      "file": "nda_halcyon.docx",
+      "contract_type": "nda",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 12,
+      "planted": 0,
+      "found": 0,
+      "recall": null,
+      "inspector_ok": 0,
+      "inspector_rate": null,
+      "severity_ok": 0,
+      "severity_rate": null,
+      "findings_total": 1,
+      "unplanted_findings": 1,
+      "unplanted_rate": 1.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 0,
+      "risk_level": "low",
+      "latency_s": 219.9,
+      "detail": []
+    },
     {
       "file": "nda_kestrel.docx",
       "contract_type": "nda",
@@ -32,16 +419,16 @@
       "recall": 1.0,
       "inspector_ok": 4,
       "inspector_rate": 0.8,
-      "severity_ok": 4,
-      "severity_rate": 0.8,
-      "findings_total": 13,
+      "severity_ok": 3,
+      "severity_rate": 0.6,
+      "findings_total": 12,
       "unplanted_findings": 0,
       "unplanted_rate": 0.0,
       "missing_expected": 0,
       "missing_found": 0,
       "missing_reported": 1,
       "risk_level": "high",
-      "latency_s": 490.2,
+      "latency_s": 408.9,
       "detail": [
         {
           "id": "nda-conf-carveout",
@@ -117,15 +504,477 @@
           "number": "11",
           "found": true,
           "inspector_ok": false,
-          "severity_ok": true,
+          "severity_ok": false,
           "expected_inspector": "template",
           "got_inspectors": [
-            "compliance",
             "risk"
           ],
           "expected_severity": "low",
           "got_severities": [
-            "low",
+            "medium"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "nda_meridian.docx",
+      "contract_type": "nda",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 12,
+      "planted": 5,
+      "found": 4,
+      "recall": 0.8,
+      "inspector_ok": 3,
+      "inspector_rate": 0.75,
+      "severity_ok": 3,
+      "severity_rate": 0.75,
+      "findings_total": 11,
+      "unplanted_findings": 0,
+      "unplanted_rate": 0.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 3,
+      "risk_level": "high",
+      "latency_s": 417.7,
+      "detail": [
+        {
+          "id": "nda-scope-oneway",
+          "number": "2",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "compliance",
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "medium"
+          ]
+        },
+        {
+          "id": "nda-compelled-nonotice",
+          "number": "4",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "low",
+          "got_severities": [
+            "high",
+            "low"
+          ]
+        },
+        {
+          "id": "nda-conf-perpetual",
+          "number": "5",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "template",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "nda-dp-overseas",
+          "number": "9",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "nda-gov-offshore",
+          "number": "10",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "compliance",
+          "got_inspectors": [],
+          "expected_severity": "medium",
+          "got_severities": []
+        }
+      ]
+    },
+    {
+      "file": "sow_straitsforge.docx",
+      "contract_type": "sow",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 9,
+      "planted": 0,
+      "found": 0,
+      "recall": null,
+      "inspector_ok": 0,
+      "inspector_rate": null,
+      "severity_ok": 0,
+      "severity_rate": null,
+      "findings_total": 5,
+      "unplanted_findings": 5,
+      "unplanted_rate": 1.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 0,
+      "risk_level": "high",
+      "latency_s": 415.0,
+      "detail": []
+    },
+    {
+      "file": "sow_windmoor.docx",
+      "contract_type": "sow",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 9,
+      "planted": 5,
+      "found": 5,
+      "recall": 1.0,
+      "inspector_ok": 3,
+      "inspector_rate": 0.6,
+      "severity_ok": 4,
+      "severity_rate": 0.8,
+      "findings_total": 9,
+      "unplanted_findings": 0,
+      "unplanted_rate": 0.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 4,
+      "risk_level": "high",
+      "latency_s": 449.4,
+      "detail": [
+        {
+          "id": "sow-scope-unilateral",
+          "number": "2",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "risk",
+            "template"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "sow-pay-upfront",
+          "number": "4",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "sow-acceptance-deemed",
+          "number": "5",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "template",
+          "got_inspectors": [
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "medium"
+          ]
+        },
+        {
+          "id": "sow-cancel-fee",
+          "number": "6",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": false,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "compliance"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "sow-ip-reuse",
+          "number": "7",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "vendor_aurelia.docx",
+      "contract_type": "vendor",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 13,
+      "planted": 0,
+      "found": 0,
+      "recall": null,
+      "inspector_ok": 0,
+      "inspector_rate": null,
+      "severity_ok": 0,
+      "severity_rate": null,
+      "findings_total": 8,
+      "unplanted_findings": 8,
+      "unplanted_rate": 1.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 1,
+      "risk_level": "high",
+      "latency_s": 419.6,
+      "detail": []
+    },
+    {
+      "file": "vendor_brightquay.pdf",
+      "contract_type": "vendor",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 13,
+      "planted": 5,
+      "found": 3,
+      "recall": 0.6,
+      "inspector_ok": 3,
+      "inspector_rate": 1.0,
+      "severity_ok": 2,
+      "severity_rate": 0.6666666666666666,
+      "findings_total": 10,
+      "unplanted_findings": 0,
+      "unplanted_rate": 0.0,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 6,
+      "risk_level": "high",
+      "latency_s": 429.4,
+      "detail": [
+        {
+          "id": "ven-supply-asis",
+          "number": "2",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "template",
+          "got_inspectors": [],
+          "expected_severity": "high",
+          "got_severities": []
+        },
+        {
+          "id": "ven-pay-net90",
+          "number": "3",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "ven-inspect-48h",
+          "number": "5",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "template",
+          "got_inspectors": [],
+          "expected_severity": "medium",
+          "got_severities": []
+        },
+        {
+          "id": "ven-term-lock",
+          "number": "6",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "compliance",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "ven-liability-strike",
+          "number": "8",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "compliance",
+            "financial",
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "vendor_larkspur.docx",
+      "contract_type": "vendor",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 12,
+      "planted": 5,
+      "found": 5,
+      "recall": 1.0,
+      "inspector_ok": 3,
+      "inspector_rate": 0.6,
+      "severity_ok": 2,
+      "severity_rate": 0.4,
+      "findings_total": 10,
+      "unplanted_findings": 0,
+      "unplanted_rate": 0.0,
+      "missing_expected": 1,
+      "missing_found": 1,
+      "missing_reported": 3,
+      "risk_level": "high",
+      "latency_s": 446.8,
+      "detail": [
+        {
+          "id": "ven-price-anytime",
+          "number": "3",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": true,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "compliance",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "ven-delivery-risk",
+          "number": "4",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "template",
+          "got_inspectors": [
+            "compliance",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "ven-indemnity-flip",
+          "number": "8",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "compliance",
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "ven-dp-subprocessors",
+          "number": "9",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "compliance",
+            "risk"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "ven-notices-post-only",
+          "number": "11",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": false,
+          "expected_inspector": "template",
+          "got_inspectors": [
+            "compliance"
+          ],
+          "expected_severity": "low",
+          "got_severities": [
             "medium"
           ]
         }
