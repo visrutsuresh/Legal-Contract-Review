@@ -20,7 +20,7 @@ from app.users import require_lawyer
 
 class FakeUser:
     id = "00000000-0000-0000-0000-000000000001"
-    email = "[REDACTED_EMAIL_ADDRESS_3]"
+    email = "priya@papyrus.dev"
     role = "lawyer"
     is_active = True
 
