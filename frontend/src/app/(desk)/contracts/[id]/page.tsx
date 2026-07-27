@@ -177,6 +177,150 @@ function AuditTrail({ id }: { id: string }) {
   );
 }
 
+const INSPECTOR_LABELS: Record<string, string> = {
+  compliance: "Compliance",
+  risk: "Risk",
+  template: "Standard-terms",
+  financial: "Financial",
+};
+
+const SEV_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
+// One-contract risk summary. Every number is read straight from the stored
+// assessment (contract_risk + the findings already pinned on each clause), so
+// it can never claim more than the review actually found.
+function RiskSummary({ s, onReport }: { s: Detail; onReport: () => void }) {
+  const clauses = s.clauses ?? [];
+  const missing = s.missing_clauses ?? [];
+  const findings = clauses.flatMap((c) => c.findings ?? []);
+  // missing clauses carry a severity + inspector too; the backend rollup counts
+  // them, so the tiles below count them as well or the tier would disagree.
+  const all: Finding[] = [...findings, ...missing];
+  const sevCount = (x: string) => all.filter((f) => f.severity === x).length;
+  const insCount = (x: string) => all.filter((f) => f.inspector === x).length;
+
+  const level = (s.contract_risk?.level ?? "unknown").toLowerCase();
+  const score = s.contract_risk?.score;
+  const why = s.contract_risk?.why ?? "";
+
+  const headingOf: Record<string, string> = {};
+  clauses.forEach((c) => {
+    headingOf[c.clause_id] = c.heading ?? c.clause_type ?? c.clause_id;
+  });
+  const top = [...findings]
+    .sort(
+      (a, b) =>
+        (SEV_RANK[a.severity ?? "low"] ?? 3) -
+        (SEV_RANK[b.severity ?? "low"] ?? 3),
+    )
+    .slice(0, 3);
+
+  const tierColor =
+    level === "high"
+      ? "var(--rust)"
+      : level === "medium"
+        ? "var(--amber)"
+        : level === "low"
+          ? "var(--olive)"
+          : "var(--ink-soft)";
+  const tierBg =
+    level === "high"
+      ? "var(--rust-wash)"
+      : level === "medium"
+        ? "var(--amber-wash)"
+        : level === "low"
+          ? "var(--olive-wash)"
+          : "var(--accent-wash)";
+
+  const sevTiles: [string, string, string][] = [
+    ["Serious", String(sevCount("high")), "var(--rust)"],
+    ["Worth a look", String(sevCount("medium")), "var(--amber)"],
+    ["Minor", String(sevCount("low")), "var(--olive)"],
+  ];
+
+  return (
+    <div className="panel p-6 mb-5">
+      <div className="flex items-center gap-4 mb-5 pb-4 border-b border-[var(--line)]">
+        <span className="badge" style={{ background: tierBg, color: tierColor }}>
+          {level} risk
+        </span>
+        <span className="font-array text-[13px]" style={{ color: tierColor }}>
+          {typeof score === "number" ? `${score}/100` : "not scored"}
+        </span>
+        {why && (
+          <span className="text-[13px] text-[var(--ink-soft)]">{why}</span>
+        )}
+        <button
+          className="finish ready ml-auto"
+          onClick={onReport}
+          title="Open a printable review report you can save as PDF"
+        >
+          Review report
+        </button>
+      </div>
+
+      <div className="label mb-2">Findings by severity</div>
+      <div className="flex gap-3 mb-5">
+        {sevTiles.map(([label, n, color]) => (
+          <div key={label} className="field flex-1 p-3">
+            <div
+              className="font-array text-[24px] leading-none"
+              style={{ color }}
+            >
+              {n}
+            </div>
+            <div className="text-[12px] text-[var(--ink-soft)] mt-1">
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="label mb-2">Findings by check</div>
+      <div className="flex gap-3 mb-5">
+        {(["compliance", "risk", "template", "financial"] as const).map((k) => (
+          <div key={k} className="field flex-1 p-3">
+            <div className="font-array text-[24px] leading-none text-[var(--accent)]">
+              {insCount(k)}
+            </div>
+            <div className="text-[12px] text-[var(--ink-soft)] mt-1">
+              {INSPECTOR_LABELS[k]}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {top.length > 0 && (
+        <>
+          <div className="label mb-2">Most serious findings</div>
+          <ul className="text-[13px]">
+            {top.map((f, i) => (
+              <li
+                key={f.finding_id ?? i}
+                className="flex gap-3 py-1.5 border-b border-[var(--line)] last:border-0"
+              >
+                <span
+                  className={`fmark ${f.severity === "high" ? "high" : f.severity === "medium" ? "med" : "low"}`}
+                  style={{ float: "none" }}
+                >
+                  {f.severity === "high"
+                    ? "Serious"
+                    : f.severity === "medium"
+                      ? "Worth a look"
+                      : "Minor"}
+                </span>
+                <span className="flex-1">
+                  <b>{headingOf[f.clause_id ?? ""] ?? f.clause_id}</b> · {f.plain}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function Review() {
   const { id } = useParams<{ id: string }>();
   const [s, setS] = useState<Detail | null>(null);
@@ -248,6 +392,24 @@ export default function Review() {
       a.download = `reviewed-${s?.filename ?? id}`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch (e) {
+      setNote(String(e));
+    }
+  }
+
+  async function openReport() {
+    // fetch the report with the auth cookie (same pattern as the .docx export),
+    // then open the returned HTML page in a new tab so the lawyer can read it
+    // and use the browser's Print dialog to save it as PDF.
+    setNote("");
+    try {
+      const res = await fetch(`${BASE}/contracts/${id}/report`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+      const url = URL.createObjectURL(await res.blob());
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (e) {
       setNote(String(e));
     }
@@ -334,13 +496,21 @@ export default function Review() {
           decisions applied. This review is filed as precedent, so future
           contracts get compared against it.
         </div>
+        <div className="mt-6 mb-2">
+          <RiskSummary s={s} onReport={openReport} />
+        </div>
         <div className="label mb-2">Final redlined document</div>
         <pre className="doc max-w-[80ch]">{doc}</pre>
-        {s.source_format === "docx" && (
-          <button className="finish ready mt-4" onClick={downloadDocx}>
-            Download corrected .docx
+        <div className="flex gap-3 mt-4">
+          {s.source_format === "docx" && (
+            <button className="finish ready" onClick={downloadDocx}>
+              Download corrected .docx
+            </button>
+          )}
+          <button className="finish ready" onClick={openReport}>
+            Review report
           </button>
-        )}
+        </div>
         {note && <div className="story mt-2">{note}</div>}
         <AuditTrail id={id} />
       </main>
@@ -390,6 +560,7 @@ export default function Review() {
           {s.summary?.executive ?? s.contract_risk?.why}
         </div>
       )}
+      <RiskSummary s={s} onReport={openReport} />
       {failed.length > 0 && (
         <div className="attn-note mb-4">
           {failed.map((k) => CHECK_NAMES[k]).join(" and ")} did not finish on

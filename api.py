@@ -347,3 +347,25 @@ async def deactivate_account(user_id: uuid.UUID, user: User = Depends(require_ad
             raise HTTPException(status_code=400, detail="you cannot deactivate your own account")
         await db.update(target, {"is_active": False})
         return {"id": str(target.id), "deactivated": True}
+
+@app.get("/contracts/{contract_id}/report")
+def review_report(contract_id: str, user: User = Depends(require_lawyer)):
+    # a printable one-page review report for ONE contract: executive summary,
+    # the risk rollup, every clause-level finding with its plain-English fix and
+    # suggested wording, and the negotiation points. All figures are read from
+    # the stored assessment (report.build_report_html), never recomputed loosely,
+    # so the page can never claim more than the review actually found. Returned as
+    # a self-contained HTML page the lawyer prints to PDF from the browser.
+    from app import report
+    state = store.get(contract_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="contract not found")
+    if state.get("status") not in ("needs_review", "reviewed"):
+        raise HTTPException(status_code=409, detail="the review is not finished yet")
+    html_doc = report.build_report_html(state)
+    stem = (state.get("filename") or contract_id).rsplit(".", 1)[0]
+    return Response(
+        content=html_doc,
+        media_type="text/html; charset=utf-8",
+        headers={"Content-Disposition": f'inline; filename="review-report-{stem}.html"'},
+    )
