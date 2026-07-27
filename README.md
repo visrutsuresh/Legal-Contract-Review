@@ -4,7 +4,7 @@ A multi-agent AI system that reads a contract, splits it into clauses, inspects 
 ways, drafts replacement wording for what it flags, and hands the whole thing to a lawyer to accept,
 reject, or edit clause by clause. Nothing is signed off without a human.
 
-Use case #4 of the Ascendion internship build, forked from the #1 [REDACTED_SQL_PASSWORD_1]-ticket skeleton.
+Use case #4 of the Ascendion internship build, forked from the #1 support-ticket skeleton.
 
 **Contracts never touch a cloud model.** There is exactly one model lane, a self-hosted
 Qwen3-30B-A3B on a Modal GPU. That is the whole privacy story, and it is why there is no
@@ -83,9 +83,9 @@ Seeded dev accounts (rotate before this is reachable by anyone else):
 
 | Email | Password | Role |
 |---|---|---|
-| `[REDACTED_EMAIL_ADDRESS_2]` | `admin-dev-password` | admin |
-| `[REDACTED_EMAIL_ADDRESS_3]` | `lawyer-dev-password` | lawyer |
-| `[REDACTED_EMAIL_ADDRESS_4]` | `lawyer-dev-password` | lawyer |
+| `admin@papyrus.dev` | `admin-dev-password` | admin |
+| `priya@papyrus.dev` | `lawyer-dev-password` | lawyer |
+| `theo@papyrus.dev` | `lawyer-dev-password` | lawyer |
 
 There is **no open signup**. The admin creates every account from the People page.
 
