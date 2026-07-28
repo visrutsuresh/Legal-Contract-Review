@@ -13,7 +13,7 @@
 | Sampling | Greedy, so runs are as reproducible as the model allows |
 | Token ceiling per call | Generous, because a finding carries nine fields and several findings in one answer will otherwise be truncated |
 
-**Note on the repository README:** it still describes an earlier, larger model (Qwen3-30B-A3B). That model was replaced because it took four to six minutes to load, which exceeded every timeout in the stack and made cold calls impossible, and because it needed cards costing roughly twice as much. The 14B model loads in about a minute. The code is the source of truth; the README line is stale.
+**Why this model and not a bigger one.** An earlier, larger model (Qwen3-30B-A3B) was tried first and abandoned on 2026-07-24. It took four to six minutes to load, which exceeded every timeout in the stack and made a cold call impossible to answer, and it needed cards costing roughly twice as much. The 14B model loads in about a minute, which is what makes a cold demo call survivable. The comment at the top of `modal_lane/llm_service.py` records the swap.
 
 ## 2. What the model is asked to do
 

@@ -7,7 +7,7 @@ reject, or edit clause by clause. Nothing is signed off without a human.
 Use case #4 of the Ascendion internship build, forked from the #1 support-ticket skeleton.
 
 **Contracts never touch a cloud model.** There is exactly one model lane, a self-hosted
-Qwen3-30B-A3B on a Modal GPU. That is the whole privacy story, and it is why there is no
+Qwen2.5-14B-Instruct on a Modal GPU. That is the whole privacy story, and it is why there is no
 `ANTHROPIC_API_KEY` or model-tier switch here the way there is in #1.
 
 ---
@@ -20,7 +20,7 @@ Qwen3-30B-A3B on a Modal GPU. That is the whole privacy story, and it is why the
 | Backend API | FastAPI (`api.py`) | upload a contract, poll the docket, decide a clause, finish a review, read the audit trail |
 | System of record | Postgres (`app/store.py`) | one row per contract: status/stage/risk columns + the full state blob |
 | Precedent cabinet | Weaviate (`app/precedent.py`) | finished reviews, retrieved by similarity so later contracts can cite earlier rulings |
-| Model lane | Modal GPU (`app/router.py`) | Qwen3-30B-A3B, 4-bit. One lane, no cloud fallback, by design |
+| Model lane | Modal GPU (`app/router.py`) | Qwen2.5-14B-Instruct, 4-bit, on an A10G. One lane, no cloud fallback, by design |
 | Lawyer UI | Next.js (`frontend/`) | the docket, the two-pane redline review, the people admin |
 | Audit trail | `app/audit.py` | SHA-256 hash chain over every pipeline step, verified on read |
 
@@ -218,7 +218,7 @@ app/
   users.py            fastapi-users auth, lawyer | admin roles
   schemas.py          the user read/create/update schemas
 modal_lane/
-  llm_service.py      the Qwen3-30B-A3B service deployed to Modal
+  llm_service.py      the Qwen2.5-14B-Instruct service deployed to Modal
 data/
   contracts/          13 synthetic contracts (.docx / .pdf)
   manifests/          what was planted in each, the bench ground truth
