@@ -6,7 +6,8 @@
 
 | Property | Value |
 |---|---|
-| Model | Qwen2.5-14B-Instruct, 4-bit quantised |
+| Model | Qwen2.5-14B-Instruct, 4-bit quantised (the official AWQ checkpoint since 2026-07-28) |
+| Serving | vLLM since 2026-07-28; previously one-at-a-time transformers generation. Up to 8 requests batch continuously on the one GPU, so parallel inspectors genuinely run in parallel |
 | Host | Serverless GPU (A10G), single container, five-minute warm window |
 | Lanes | **One.** No cloud model, no tier switch, no fallback |
 | Embeddings | A small local model, computed on the machine |

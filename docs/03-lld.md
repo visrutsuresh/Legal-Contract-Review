@@ -52,7 +52,7 @@ Every node is wrapped in a guard that gives it a bounded wall-clock and one retr
 | One inspector fails both attempts | Its report is marked failed with a note; the other three still produce findings and the review continues |
 | Negotiation or summary fails | The review still reaches the lawyer with findings; the missing part is visible |
 | The model lane returns a stray server error | One retry, because a container swap mid-run surfaces exactly this way |
-| Parallel calls arriving together | A client-side lock serialises them onto the single container, so the platform never wakes a second billed GPU |
+| Parallel calls arriving together | The lane batches up to 8 requests inside its single container (vLLM, since 2026-07-28); the platform-side single-container cap is what still prevents a second billed GPU. The client-side lock that used to serialise calls is gone |
 
 ## 5. Fan-in, in plain code
 
@@ -71,7 +71,7 @@ Export rewrites the **original** document rather than generating a new one: it m
 | `app/agents.py` | Six agent prompts plus finding stamping and inspector running |
 | `app/agents_base.py` | The reasoning loop and the JSON parser |
 | `app/tools.py` | The three read-only tools and the registry |
-| `app/router.py` | The single model lane, lock, retry, timeout |
+| `app/router.py` | The single model lane, retry, timeout |
 | `app/store.py` | Postgres access |
 | `app/precedent.py` | Weaviate collection, lazy embedding load |
 | `app/export.py` | Document rewrite |

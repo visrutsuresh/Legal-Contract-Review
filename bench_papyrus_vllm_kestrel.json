@@ -1,0 +1,120 @@
+{
+  "config": "only=kestrel",
+  "contract_timeout_s": 2700,
+  "totals": {
+    "contracts": 1,
+    "errors": 0,
+    "extraction_ok": 1,
+    "planted": 5,
+    "found": 3,
+    "recall": 0.6,
+    "inspector_rate": 0.6666666666666666,
+    "severity_rate": 0.6666666666666666,
+    "findings_total": 6,
+    "unplanted_findings": 1,
+    "unplanted_rate": 0.16666666666666666,
+    "missing_expected": 0,
+    "missing_found": 0,
+    "missing_reported": 0,
+    "avg_latency_s": 150.1,
+    "total_latency_s": 150.1
+  },
+  "rows": [
+    {
+      "file": "nda_kestrel.docx",
+      "contract_type": "nda",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 12,
+      "planted": 5,
+      "found": 3,
+      "recall": 0.6,
+      "inspector_ok": 2,
+      "inspector_rate": 0.6666666666666666,
+      "severity_ok": 2,
+      "severity_rate": 0.6666666666666666,
+      "findings_total": 6,
+      "unplanted_findings": 1,
+      "unplanted_rate": 0.16666666666666666,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 0,
+      "risk_level": "high",
+      "latency_s": 150.1,
+      "detail": [
+        {
+          "id": "nda-conf-carveout",
+          "number": "3",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "compliance",
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "nda-ip-grab",
+          "number": "6",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "risk",
+          "got_inspectors": [],
+          "expected_severity": "high",
+          "got_severities": []
+        },
+        {
+          "id": "nda-return-keep",
+          "number": "7",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": false,
+          "expected_inspector": "template",
+          "got_inspectors": [
+            "risk"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "nda-liq-damages",
+          "number": "8",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "financial",
+          "got_inspectors": [
+            "financial",
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high",
+            "medium"
+          ]
+        },
+        {
+          "id": "nda-notices-fax",
+          "number": "11",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "template",
+          "got_inspectors": [],
+          "expected_severity": "low",
+          "got_severities": []
+        }
+      ]
+    }
+  ]
+}

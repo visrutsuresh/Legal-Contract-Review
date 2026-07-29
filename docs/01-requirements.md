@@ -36,7 +36,7 @@ Contracts never touch a cloud model. There is exactly one self-hosted model lane
 | NFR-1 | Contract text never reaches a third-party model | Zero exceptions | MET by construction: one lane, no cloud client in the codebase |
 | NFR-2 | A whole contract review completes without human intervention | under 45 minutes | MET, measured mean 429 seconds over 13 contracts |
 | NFR-3 | A stuck or crashed agent must not hang the review | Per-node guard | MET, guarded nodes with a 1200 second ceiling and a retry |
-| NFR-4 | Parallel inspectors must not multiply GPU cost | One container | MET, single-container lane plus a client-side lock so calls queue |
+| NFR-4 | Parallel inspectors must not multiply GPU cost | One container | MET, single-container lane; since the 2026-07-28 vLLM swap the container batches up to 8 requests itself, so the old client-side lock is gone and inspectors run in parallel at no extra cost |
 | NFR-5 | A half-formed finding is never shown to a lawyer | Validation before display | MET |
 | NFR-6 | The audit trail detects tampering | Detection, not prevention | MET |
 | NFR-7 | Synthetic contracts only, secrets outside the repository | No real client data | MET |
