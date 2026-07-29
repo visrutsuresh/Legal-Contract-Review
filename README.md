@@ -20,7 +20,7 @@ Qwen2.5-14B-Instruct on a Modal GPU. That is the whole privacy story, and it is 
 | Backend API | FastAPI (`api.py`) | upload a contract, poll the docket, decide a clause, finish a review, read the audit trail |
 | System of record | Postgres (`app/store.py`) | one row per contract: status/stage/risk columns + the full state blob |
 | Precedent cabinet | Weaviate (`app/precedent.py`) | finished reviews, retrieved by similarity so later contracts can cite earlier rulings |
-| Model lane | Modal GPU (`app/router.py`) | Qwen2.5-14B-Instruct, 4-bit AWQ, served by vLLM on an A10G. One lane, no cloud fallback, by design |
+| Model lane | Modal GPU (`app/router.py`) | Qwen2.5-14B-Instruct, 4-bit bitsandbytes, one-at-a-time transformers generation on an A10G. One lane, no cloud fallback, by design |
 | Lawyer UI | Next.js (`frontend/`) | the docket, the two-pane redline review, the people admin |
 | Audit trail | `app/audit.py` | SHA-256 hash chain over every pipeline step, verified on read |
 

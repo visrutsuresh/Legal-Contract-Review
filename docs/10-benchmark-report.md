@@ -56,6 +56,24 @@ Before the prompt work, the same pipeline on a smaller locally hosted model scor
 
 That sequence is the useful story: the gains came from telling the agents how to work, not from a larger model.
 
+## 5a. The vLLM + AWQ trial, and why the numbers above still stand
+
+On 2026-07-28 the lane was swapped to vLLM serving the official AWQ checkpoint, for speed. On 2026-07-29 the **full corpus was rerun on that stack** and the swap was rolled back. Both result files are in the repository, so the comparison can be checked rather than taken on trust: `bench_papyrus.json` is the shipped stack, `bench_papyrus_vllm_13.json` is the trial.
+
+| | bitsandbytes (shipped) | vLLM + AWQ (rejected) |
+|---|---|---|
+| Detection recall | **87.5%** | 67.5% |
+| Findings produced | 109 | 69 |
+| Severity agreement | 62.9% | 59.3% |
+| Extraction succeeded | 13/13 | 11/13 |
+| Mean latency | 429s | **144.8s** |
+
+Three times faster, twenty points less recall. The decision and its reasoning are ADR-012.
+
+Two things are worth recording about how this was measured. The first rerun attempt was **abandoned partway** because the log showed inspectors failing to parse their own output; continuing would have measured a bug rather than a model. The cause was the model emitting Python literals inside its JSON, which made strict parsing discard entire inspector answers. That was fixed first, and only then was the comparison run, so the 67.5% is the model's real performance and not an artifact.
+
+The second: a single contract had suggested this same conclusion a day earlier, at 3/5 against 5/5. That signal was correct, but it was **not trustworthy at the time** and was rightly not acted on, because one contract cannot separate quantisation damage from ordinary run-to-run variation. Thirteen can.
+
 ## 6. Reproducing
 
 ```bash

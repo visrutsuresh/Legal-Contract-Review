@@ -52,7 +52,7 @@ Every node is wrapped in a guard that gives it a bounded wall-clock and one retr
 | One inspector fails both attempts | Its report is marked failed with a note; the other three still produce findings and the review continues |
 | Negotiation or summary fails | The review still reaches the lawyer with findings; the missing part is visible |
 | The model lane returns a stray server error | One retry, because a container swap mid-run surfaces exactly this way |
-| Parallel calls arriving together | The lane batches up to 8 requests inside its single container (vLLM, since 2026-07-28); the platform-side single-container cap is what still prevents a second billed GPU. The client-side lock that used to serialise calls is gone |
+| Parallel calls arriving together | A client-side lock serialises them, and the platform-side single-container cap prevents a second billed GPU. A vLLM swap removed the lock on 2026-07-28 and was rolled back on 2026-07-29 (ADR-014) |
 
 ## 5. Fan-in, in plain code
 

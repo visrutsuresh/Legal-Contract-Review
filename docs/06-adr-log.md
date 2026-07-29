@@ -92,3 +92,29 @@
 **Context.** A contract with zero findings is reported as low risk, which is indistinguishable from a slightly untidy one.
 **Decision.** Leave it, and pin today's behaviour with a test, rather than change risk semantics immediately before a measurement run.
 **Consequences.** The benchmark numbers are comparable. The oddity is documented, and changing it later will break the test loudly rather than silently.
+
+---
+
+## ADR-012. Roll back the vLLM + AWQ lane, keep the tolerant JSON parser
+
+**Context.** On 2026-07-28 the lane moved from one-at-a-time transformers generation with a bitsandbytes-quantised model to vLLM serving the official AWQ checkpoint, batching up to 8 requests in one container. It was 3.3x faster on a single contract, but that same contract scored recall 3/5 against the earlier run's 5/5. One contract could not separate quantisation damage from run noise, so the decision was deferred and the headline benchmark numbers in these documents still described the old stack.
+
+**What was measured, 2026-07-29.** The full 13-contract benchmark was rerun on vLLM, after fixing a parser bug found on the way (below), so the comparison is like for like against the committed `bench_papyrus.json`.
+
+| | bitsandbytes | vLLM + AWQ |
+|---|---|---|
+| Detection recall | 35/40 = **87.5%** | 27/40 = **67.5%** |
+| Findings produced | 109 | 69 |
+| Severity agreement | 62.9% | 59.3% |
+| Extraction succeeded | 13/13 | 11/13 |
+| Mean latency | 429s | **144.8s** |
+
+The speed was real and reproducible: 3.0x. The quality loss was also real, concentrated rather than diffuse (`nda_kestrel` 5/5 to 2/5, `vendor_larkspur` 5/5 to 3/5), and it survived excluding the contracts whose extraction failed. `vendor_brightquay.pdf` additionally stopped extracting at all, stranding five planted defects.
+
+**Options.** Keep vLLM and restate the benchmark numbers downward; keep it and try to recover recall through prompt work; roll back.
+
+**Decision.** Roll back. Recall is the product in contract review, and 3.0x speed does not buy back twenty points of it. A slow demonstration is survivable; one that misses a fifth of the planted defects is not. The lane returns to bitsandbytes and both routers return to the client-side lock.
+
+**Consequences.** Per-contract latency goes back to roughly seven minutes, which the demonstration must be planned around: warm the lane first and prefer the recorded fallback. Rolling back also restores the validity of every benchmark number already published in both systems' documents, which removes the contradiction that had opened between the model cards and the benchmark reports.
+
+**One change from the episode is deliberately KEPT**, because it is a real defect independent of the swap: `_parse` now falls back to a tolerant read when the model emits Python literals (`True`, `False`, `None`) inside otherwise valid JSON. Strict JSON rejected the entire reply, so a 7kB template-inspector answer containing real findings was discarded over one capital letter, and `temperature=0` meant the retry reproduced the failure exactly rather than recovering. Both attempts failed identically and the inspector reported nothing. The fallback is string-aware, so a finding whose text merely mentions the word True is untouched. Applied to both this system and the governance sibling, which share the parser.
