@@ -1,10 +1,30 @@
+import os
+
 import weaviate
 from fastembed import TextEmbedding
 from weaviate.classes.config import DataType, Property
 from weaviate.classes.query import Filter, MetadataQuery
 
-COLLECTION = "Precedent"
+# env-driven because the deployed apps share one Weaviate cluster and #6's
+# cloud collection already claimed "Precedent" (deployed #4 uses LegalPrecedent)
+COLLECTION = os.getenv("WEAVIATE_COLLECTION", "Precedent")
 RELEVANCE_FLOOR = 60  # below this, a hit is off-topic noise, not precedent
+
+
+def _client():
+    # WEAVIATE_URL + WEAVIATE_API_KEY switch to Weaviate Cloud (the deployed path)
+    url = os.getenv("WEAVIATE_URL")
+    if url:
+        from weaviate.classes.init import Auth
+
+        return weaviate.connect_to_weaviate_cloud(
+            cluster_url=url, auth_credentials=Auth.api_key(os.getenv("WEAVIATE_API_KEY", ""))
+        )
+    return weaviate.connect_to_local(
+        host=os.getenv("WEAVIATE_HOST", "localhost"),
+        port=int(os.getenv("WEAVIATE_PORT", "8081")),
+        grpc_port=int(os.getenv("WEAVIATE_GRPC", "50052")),
+    )
 
 _model = None  # loaded on first use so a plain import stays instant
 
@@ -19,7 +39,7 @@ def embed(text: str) -> list[float]:
 
 def ensure_collection() -> None:
     # create the Precedent drawer if this Weaviate has never seen it
-    client = weaviate.connect_to_local(port=8081, grpc_port=50052)
+    client = _client()
     try:
         if not client.collections.exists(COLLECTION):
             client.collections.create(
@@ -35,7 +55,7 @@ def ensure_collection() -> None:
 
 
 def search(query: str, k: int = 5) -> list[dict]:
-    client = weaviate.connect_to_local(port=8081, grpc_port=50052)
+    client = _client()
     try:
         col = client.collections.get(COLLECTION)
         vec = embed(query)
@@ -55,7 +75,7 @@ def index_reviewed(title: str, content: str, source: str = "review") -> None:
     # file one finished review into the cabinet so future reviews can find it.
     # source "review" is a real contract a lawyer signed off; "seed" is the
     # starter set from seed_precedent.py. Only the seed is ever bulk-deleted.
-    client = weaviate.connect_to_local(port=8081, grpc_port=50052)
+    client = _client()
     try:
         col = client.collections.get(COLLECTION)
         col.data.insert(
@@ -69,7 +89,7 @@ def index_reviewed(title: str, content: str, source: str = "review") -> None:
 def clear_seeded() -> int:
     # drop ONLY the seeded rows, never a real filed review: re-running the
     # seed script must not throw away precedent a lawyer actually created
-    client = weaviate.connect_to_local(port=8081, grpc_port=50052)
+    client = _client()
     try:
         col = client.collections.get(COLLECTION)
         res = col.data.delete_many(where=Filter.by_property("source").equal("seed"))
