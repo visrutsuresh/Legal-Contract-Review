@@ -54,9 +54,11 @@ export default function DeskLayout({
             <span className="text-[var(--accent)]">.</span>
           </div>
           <nav className="flex gap-6 ml-6">
-            <Link href="/docket" className={linkCls(onDocket)}>
-              Docket
-            </Link>
+            {user.role !== "admin" && (
+              <Link href="/docket" className={linkCls(onDocket)}>
+                Docket
+              </Link>
+            )}
             {user.role === "admin" && (
               <Link href="/admin" className={linkCls(onPeople)}>
                 People

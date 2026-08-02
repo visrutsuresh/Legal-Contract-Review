@@ -24,7 +24,6 @@ ALLOWED = {
     # which is ordinary commercial wording, not #1 vocabulary
     "make_contracts.py": "contract wording legitimately says 'customers'",
     # states what Papyrus does NOT have; the contrast is the point of the line
-    "app/users.py": "comment explains there is no customer role here",
     # naming the fork's parent is deliberate provenance, not leftover branding
     "README.md": "documents that this is forked from use case #1",
     # this file lists the banned words in order to test for them

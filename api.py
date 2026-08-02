@@ -6,10 +6,13 @@ from datetime import datetime, timezone
 
 from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users.exceptions import UserAlreadyExists
+from fastapi_users.password import PasswordHelper
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from pydantic import BaseModel
-from sqlalchemy import select
+from pydantic import BaseModel, Field
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 
 from app import audit, export, precedent, store
 from app.graph import PENDING_FILES, graph, initial_state, submit
@@ -21,6 +24,7 @@ from app.users import (
     create_user_table,
     current_user,
     fastapi_users,
+    get_jwt_strategy,
     require_admin,
     require_lawyer,
     session_maker,
@@ -49,6 +53,59 @@ app.add_middleware(
 )
 
 app.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth", tags=["auth"])
+
+_pw_helper = PasswordHelper()
+
+
+async def _find_by_identifier(ident: str) -> User | None:
+    # "@" means email; anything else is a username. Both compared lowercase.
+    ident = ident.strip().lower()
+    async with session_maker() as session:
+        col = func.lower(User.email) if "@" in ident else func.lower(User.username)
+        return (await session.execute(select(User).where(col == ident))).scalars().first()
+
+
+@app.post("/auth/login-flex")
+async def login_flex(credentials: OAuth2PasswordRequestForm = Depends()):
+    # same cookie as /auth/login, but the identifier may be an email OR a username
+    target = await _find_by_identifier(credentials.username)
+    if target is None:
+        _pw_helper.hash(credentials.password)  # burn the same time as a real check
+        raise HTTPException(status_code=400, detail="LOGIN_BAD_CREDENTIALS")
+    verified, _ = _pw_helper.verify_and_update(credentials.password, target.hashed_password)
+    if not verified or not target.is_active:
+        raise HTTPException(status_code=400, detail="LOGIN_BAD_CREDENTIALS")
+    return await auth_backend.login(get_jwt_strategy(), target)
+
+
+@app.get("/auth/needs-setup")
+async def needs_setup():
+    # the login page asks this to decide whether to show the one-time setup form
+    async with session_maker() as session:
+        n = (await session.execute(select(func.count()).select_from(User))).scalar_one()
+    return {"needs_setup": n == 0}
+
+
+class BootstrapIn(BaseModel):
+    email: str = Field(min_length=3, max_length=254)
+    username: str = Field(min_length=3, max_length=40)
+    password: str = Field(min_length=8, max_length=200)
+
+
+@app.post("/auth/bootstrap")
+async def bootstrap_admin(payload: BootstrapIn):
+    # first-run only: creates the founding admin while the system has ZERO
+    # accounts, then this door closes forever. Single worker makes the
+    # count-then-create window a non-issue in practice.
+    async with session_maker() as session:
+        n = (await session.execute(select(func.count()).select_from(User))).scalar_one()
+        if n:
+            raise HTTPException(status_code=403, detail="setup is already complete; ask an administrator for an account")
+        db = SQLAlchemyUserDatabase(session, User)
+        mgr = UserManager(db)
+        created = await mgr.create(UserCreate(email=payload.email, password=payload.password, role="admin"))
+        created = await db.update(created, {"role": "admin", "username": payload.username.strip().lower()})
+        return {"id": str(created.id), "email": created.email, "username": created.username, "role": created.role}
 # no register router on purpose: accounts exist only when an admin creates them (see the /users routes)
 
 
@@ -289,7 +346,7 @@ def export_contract(contract_id: str, user: User = Depends(require_lawyer)):
 @app.get("/users/me")
 def who_am_i(user: User = Depends(current_user)):
     # any signed-in account, not admin-gated: the browser calls this to learn who is logged in (Task 32)
-    return {"id": str(user.id), "email": user.email, "role": user.role, "is_active": user.is_active}
+    return {"id": str(user.id), "email": user.email, "username": user.username, "role": user.role, "is_active": user.is_active}
 
 
 ROLES = ("lawyer", "admin")
@@ -299,22 +356,26 @@ ROLES = ("lawyer", "admin")
 async def list_users(user: User = Depends(require_admin)):
     async with session_maker() as session:
         rows = (await session.execute(select(User).order_by(User.email))).scalars().all()
-        return [{"id": str(x.id), "email": x.email, "role": x.role, "is_active": x.is_active} for x in rows]
+        return [{"id": str(x.id), "email": x.email, "username": x.username, "role": x.role, "is_active": x.is_active} for x in rows]
 
 
 @app.post("/users")
 async def create_account(payload: UserCreate, user: User = Depends(require_admin)):
     if payload.role not in ROLES:
         raise HTTPException(status_code=422, detail="role must be lawyer or admin")
+    payload.username = (payload.username or "").strip().lower() or None
     async with session_maker() as session:
         db = SQLAlchemyUserDatabase(session, User)
         mgr = UserManager(db)
         try:
-            created = await mgr.create(payload)
+            created = await mgr.create(payload)  # username rides along in the schema, so a duplicate fails HERE at the insert
         except UserAlreadyExists:
             raise HTTPException(status_code=409, detail="an account with that email already exists")
+        except IntegrityError:
+            await session.rollback()  # nothing was created; the failed insert just poisons the session
+            raise HTTPException(status_code=409, detail="that username is already taken")
         created = await db.update(created, {"role": payload.role})  # belt and braces: pin the role even if a schema tweak ever drops it from create
-        return {"id": str(created.id), "email": created.email, "role": created.role, "is_active": created.is_active}
+        return {"id": str(created.id), "email": created.email, "username": created.username, "role": created.role, "is_active": created.is_active}
 
 
 @app.patch("/users/{user_id}")
@@ -328,11 +389,15 @@ async def edit_account(user_id: uuid.UUID, payload: UserUpdate, user: User = Dep
         target = await db.get(user_id)
         if target is None:
             raise HTTPException(status_code=404, detail="user not found")
+        if payload.username is not None:
+            payload.username = payload.username.strip().lower() or None
         try:
             updated = await mgr.update(payload, target, safe=False)
         except UserAlreadyExists:
             raise HTTPException(status_code=409, detail="an account with that email already exists")
-        return {"id": str(updated.id), "email": updated.email, "role": updated.role, "is_active": updated.is_active}
+        except IntegrityError:
+            raise HTTPException(status_code=409, detail="that username is already taken")
+        return {"id": str(updated.id), "email": updated.email, "username": updated.username, "role": updated.role, "is_active": updated.is_active}
 
 
 @app.delete("/users/{user_id}")

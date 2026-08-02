@@ -20,14 +20,15 @@ export function useUser() {
   return { user, loading };
 }
 
-export async function login(email: string, password: string) {
-  const res = await fetch("http://localhost:8000/auth/login", {
+export async function login(identifier: string, password: string) {
+  // login-flex accepts an email or a username in the same field
+  const res = await fetch("http://localhost:8000/auth/login-flex", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ username: email, password }),
+    body: new URLSearchParams({ username: identifier, password }),
   });
-  if (!res.ok) throw new Error("Wrong email or password");
+  if (!res.ok) throw new Error("Wrong email/username or password");
 }
 
 export async function logout() {

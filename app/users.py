@@ -24,8 +24,10 @@ class Base(DeclarativeBase):
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
-    # lawyer (admin-created) | admin (seeded). No customer role, no open signup.
+    # lawyer | admin. The first account is created by the one-time setup screen
+    # (bootstrap); after that only admins create accounts. No open signup.
     role = Column(String, nullable=False, default="lawyer")
+    username = Column(String, unique=True, nullable=True)  # optional sign-in alias next to the email
 
 
 engine = create_async_engine(ASYNC_DB_URL)
@@ -35,6 +37,12 @@ session_maker = async_sessionmaker(engine, expire_on_commit=False)
 async def create_user_table():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # migration seam: create_all only fires on a fresh database; existing
+        # databases get the username column patched in here
+        from sqlalchemy import text
+
+        await conn.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS username VARCHAR'))
+        await conn.execute(text('CREATE UNIQUE INDEX IF NOT EXISTS user_username_uniq ON "user"(username)'))
 
 
 async def get_user_db():
