@@ -530,6 +530,121 @@ h3 {
   padding: 28px 30px;
 }
 
+/* ---------- processing page: shimmering skeleton ---------- */
+
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--line) 25%,
+    var(--accent-wash) 50%,
+    var(--line) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- review shell: sticky risk rail + aligned clause rows ---------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
+  align-items: start;
+}
+.rail {
+  position: sticky;
+  top: 20px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.rail-sec {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.meter {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent-wash);
+  box-shadow: var(--press);
+  overflow: hidden;
+}
+.meter i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s var(--ease);
+}
+.srow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+.sbar {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--accent-wash);
+  box-shadow: var(--press);
+  overflow: hidden;
+}
+.sbar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+}
+.rail-find {
+  font-size: 12.5px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+.rail-find:last-child {
+  border-bottom: 0;
+}
+.ledger-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+.ledger-head > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--line);
+}
+/* each clause is ONE row spanning both panes, so left and right
+   can never drift out of line whatever the text lengths are */
+.clause-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+.clause-row .clause,
+.clause-row .rl {
+  margin-bottom: 0;
+}
+.not-present {
+  padding: 12px 16px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
 /* ============================================================
    REJECTED FINALIST, kept as the record of the D35 decision.
    Flat parchment classic: separate panel colour, 1px borders,

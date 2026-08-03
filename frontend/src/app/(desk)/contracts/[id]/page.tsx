@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api, BASE } from "@/lib/api";
-import { STAGE_LINES } from "@/lib/stages";
+import { STAGE_LINES, STAGE_ORDER } from "@/lib/stages";
 
 type Finding = {
   finding_id?: string;
@@ -186,15 +186,17 @@ const INSPECTOR_LABELS: Record<string, string> = {
 
 const SEV_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
-// One-contract risk summary. Every number is read straight from the stored
-// assessment (contract_risk + the findings already pinned on each clause), so
-// it can never claim more than the review actually found.
-function RiskSummary({ s, onReport }: { s: Detail; onReport: () => void }) {
+// The risk rail (layout B): everything a lawyer judges the contract by, in one
+// sticky column sorted top-down by how much it matters: tier and score, then
+// severity counts, then per-check counts, then the worst findings. Every number
+// is read straight from the stored assessment, so it can never claim more than
+// the review actually found.
+function RiskRail({ s, onReport }: { s: Detail; onReport: () => void }) {
   const clauses = s.clauses ?? [];
   const missing = s.missing_clauses ?? [];
   const findings = clauses.flatMap((c) => c.findings ?? []);
   // missing clauses carry a severity + inspector too; the backend rollup counts
-  // them, so the tiles below count them as well or the tier would disagree.
+  // them, so the rail counts them as well or the tier would disagree.
   const all: Finding[] = [...findings, ...missing];
   const sevCount = (x: string) => all.filter((f) => f.severity === x).length;
   const insCount = (x: string) => all.filter((f) => f.inspector === x).length;
@@ -232,92 +234,108 @@ function RiskSummary({ s, onReport }: { s: Detail; onReport: () => void }) {
           ? "var(--olive-wash)"
           : "var(--accent-wash)";
 
-  const sevTiles: [string, string, string][] = [
-    ["Serious", String(sevCount("high")), "var(--rust)"],
-    ["Worth a look", String(sevCount("medium")), "var(--amber)"],
-    ["Minor", String(sevCount("low")), "var(--olive)"],
+  const sevRows: [string, string, string][] = [
+    ["high", "Serious", "var(--rust)"],
+    ["medium", "Worth a look", "var(--amber)"],
+    ["low", "Minor", "var(--olive)"],
   ];
 
+  // checks sorted biggest first; a zero stays visible but fades back
+  const checks = (["compliance", "risk", "template", "financial"] as const)
+    .map((k) => ({ k, n: insCount(k) }))
+    .sort((a, b) => b.n - a.n);
+  const maxCheck = Math.max(1, ...checks.map((c) => c.n));
+
   return (
-    <div className="panel p-6 mb-5">
-      <div className="flex items-center gap-4 mb-5 pb-4 border-b border-[var(--line)]">
+    <aside className="rail panel">
+      <div className="text-center pt-2">
         <span className="badge" style={{ background: tierBg, color: tierColor }}>
           {level} risk
         </span>
-        <span className="font-array text-[13px]" style={{ color: tierColor }}>
-          {typeof score === "number" ? `${score}/100` : "not scored"}
-        </span>
-        {why && (
-          <span className="text-[13px] text-[var(--ink-soft)]">{why}</span>
-        )}
-        <button
-          className="finish ready ml-auto"
-          onClick={onReport}
-          title="Open a printable review report you can save as PDF"
-        >
-          Review report
-        </button>
-      </div>
-
-      <div className="label mb-2">Findings by severity</div>
-      <div className="flex gap-3 mb-5">
-        {sevTiles.map(([label, n, color]) => (
-          <div key={label} className="field flex-1 p-3">
+        {typeof score === "number" ? (
+          <>
             <div
-              className="font-array text-[24px] leading-none"
-              style={{ color }}
+              className="font-array text-[42px] leading-none mt-4"
+              style={{ color: tierColor }}
             >
-              {n}
+              {score}
             </div>
             <div className="text-[12px] text-[var(--ink-soft)] mt-1">
-              {label}
+              out of 100
             </div>
+            <div className="meter mt-3">
+              <i style={{ width: `${score}%`, background: tierColor }} />
+            </div>
+          </>
+        ) : (
+          <div className="text-[13px] text-[var(--ink-soft)] mt-3">
+            not scored
+          </div>
+        )}
+        {why && (
+          <div className="text-[12px] text-[var(--ink-soft)] mt-2.5">{why}</div>
+        )}
+      </div>
+
+      <div className="rail-sec">
+        <div className="label mb-1.5">By severity</div>
+        {sevRows.map(([key, text, color]) => (
+          <div key={key} className="srow">
+            <span
+              className="font-array text-[10px] tracking-[0.12em] uppercase"
+              style={{ color }}
+            >
+              {text}
+            </span>
+            <b className="font-array text-[16px]" style={{ color }}>
+              {sevCount(key)}
+            </b>
           </div>
         ))}
       </div>
 
-      <div className="label mb-2">Findings by check</div>
-      <div className="flex gap-3 mb-5">
-        {(["compliance", "risk", "template", "financial"] as const).map((k) => (
-          <div key={k} className="field flex-1 p-3">
-            <div className="font-array text-[24px] leading-none text-[var(--accent)]">
-              {insCount(k)}
-            </div>
-            <div className="text-[12px] text-[var(--ink-soft)] mt-1">
-              {INSPECTOR_LABELS[k]}
-            </div>
+      <div className="rail-sec">
+        <div className="label mb-1.5">By check</div>
+        {checks.map(({ k, n }) => (
+          <div key={k} className={`srow ${n === 0 ? "opacity-40" : ""}`}>
+            <span className="text-[13px]">{INSPECTOR_LABELS[k]}</span>
+            <span className="sbar">
+              <i style={{ width: `${(n / maxCheck) * 100}%` }} />
+            </span>
+            <b className="font-array text-[16px] text-[var(--accent)]">{n}</b>
           </div>
         ))}
       </div>
 
       {top.length > 0 && (
-        <>
-          <div className="label mb-2">Most serious findings</div>
-          <ul className="text-[13px]">
-            {top.map((f, i) => (
-              <li
-                key={f.finding_id ?? i}
-                className="flex gap-3 py-1.5 border-b border-[var(--line)] last:border-0"
+        <div className="rail-sec">
+          <div className="label mb-1">Most serious findings</div>
+          {top.map((f, i) => (
+            <div key={f.finding_id ?? i} className="rail-find">
+              <span
+                className={`fmark ${f.severity === "high" ? "high" : f.severity === "medium" ? "med" : "low"}`}
+                style={{ float: "none", display: "block", margin: "0 0 2px" }}
               >
-                <span
-                  className={`fmark ${f.severity === "high" ? "high" : f.severity === "medium" ? "med" : "low"}`}
-                  style={{ float: "none" }}
-                >
-                  {f.severity === "high"
-                    ? "Serious"
-                    : f.severity === "medium"
-                      ? "Worth a look"
-                      : "Minor"}
-                </span>
-                <span className="flex-1">
-                  <b>{headingOf[f.clause_id ?? ""] ?? f.clause_id}</b> · {f.plain}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </>
+                {f.severity === "high"
+                  ? "Serious"
+                  : f.severity === "medium"
+                    ? "Worth a look"
+                    : "Minor"}
+              </span>
+              <b>{headingOf[f.clause_id ?? ""] ?? f.clause_id}</b> · {f.plain}
+            </div>
+          ))}
+        </div>
       )}
-    </div>
+
+      <button
+        className="finish ready w-full"
+        onClick={onReport}
+        title="Open a printable review report you can save as PDF"
+      >
+        Review report
+      </button>
+    </aside>
   );
 }
 
@@ -349,7 +367,7 @@ export default function Review() {
 
   function select(cid: string) {
     setSel(cid);
-    // scroll the matching card into the middle of the right pane
+    // scroll the matching card into the middle of the pane
     setTimeout(() => {
       document
         .getElementById(`rl-${cid}`)
@@ -441,17 +459,46 @@ export default function Review() {
   );
 
   if (s.status === "processing") {
+    const idx = Math.max(0, STAGE_ORDER.indexOf(s.stage ?? "reading"));
+    const pct = ((idx + 1) / STAGE_ORDER.length) * 100;
     return (
       <main className="py-9">
         {back}
         <h1 className="text-[24px] font-bold mt-4">{s.filename}</h1>
-        <div className="flex items-center gap-2.5 mt-6 text-[var(--ink-soft)]">
+
+        <div className="flex items-center gap-3.5 mt-6">
+          <div className="pbar" style={{ width: 280 }}>
+            <i style={{ width: `${pct}%` }} />
+          </div>
+          <span className="font-array text-[11.5px] text-[var(--ink-soft)]">
+            STEP {idx + 1} OF {STAGE_ORDER.length}
+          </span>
+        </div>
+        <div className="flex items-center gap-2.5 mt-3 text-[var(--ink-soft)]">
           <i className="pulse" />
           {STAGE_LINES[s.stage ?? ""] ?? "Working on it…"}
         </div>
-        <p className="text-[13px] text-[var(--ink-soft)] mt-3">
-          This page checks for the finished review every few seconds. You can go
-          back to the docket; nothing is lost.
+
+        {/* a ghost of the review that is coming: two shimmering panes */}
+        <div className="grid grid-cols-2 gap-6 items-start mt-8">
+          {[0, 1].map((col) => (
+            <div key={col} className="panel p-7">
+              <div className="skel h-4 w-1/3 mb-6" />
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="mb-7">
+                  <div className="skel h-3.5 w-1/2 mb-2.5" />
+                  <div className="skel h-3 w-full mb-1.5" />
+                  <div className="skel h-3 w-full mb-1.5" />
+                  <div className="skel h-3 w-2/3" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <p className="text-[13px] text-[var(--ink-soft)] mt-4">
+          This page checks for the finished review every few seconds and will
+          flip to the full redline on its own.
         </p>
       </main>
     );
@@ -496,22 +543,24 @@ export default function Review() {
           decisions applied. This review is filed as precedent, so future
           contracts get compared against it.
         </div>
-        <div className="mt-6 mb-2">
-          <RiskSummary s={s} onReport={openReport} />
+        <div className="shell mt-6">
+          <RiskRail s={s} onReport={openReport} />
+          <div>
+            <div className="label mb-2">Final redlined document</div>
+            <pre className="doc">{doc}</pre>
+            <div className="flex gap-3 mt-4">
+              {s.source_format === "docx" && (
+                <button className="finish ready" onClick={downloadDocx}>
+                  Download corrected .docx
+                </button>
+              )}
+              <button className="finish ready" onClick={openReport}>
+                Review report
+              </button>
+            </div>
+            {note && <div className="story mt-2">{note}</div>}
+          </div>
         </div>
-        <div className="label mb-2">Final redlined document</div>
-        <pre className="doc max-w-[80ch]">{doc}</pre>
-        <div className="flex gap-3 mt-4">
-          {s.source_format === "docx" && (
-            <button className="finish ready" onClick={downloadDocx}>
-              Download corrected .docx
-            </button>
-          )}
-          <button className="finish ready" onClick={openReport}>
-            Review report
-          </button>
-        </div>
-        {note && <div className="story mt-2">{note}</div>}
         <AuditTrail id={id} />
       </main>
     );
@@ -524,6 +573,149 @@ export default function Review() {
       .map((r) => r.inspector),
   );
   const failed = Object.keys(CHECK_NAMES).filter((k) => !okChecks.has(k));
+
+  // the right-hand cell for one clause: the quiet line for a clean clause,
+  // or the full proposal card for a flagged one
+  function redlineCell(c: Clause) {
+    const sev = worstSeverity(c);
+    if (!sev) {
+      return (
+        <div className="rl">
+          <div className="rl-quiet">
+            {c.number ? `${c.number}. ` : ""}
+            {c.heading ?? "Clause"}: looks standard, no change proposed.
+          </div>
+        </div>
+      );
+    }
+    const stateLabel =
+      c.decision === "accepted"
+        ? "Accepted"
+        : c.decision === "rejected"
+          ? "Kept as-is"
+          : c.decision === "edited"
+            ? "Your wording"
+            : "Your call";
+    const stateCls =
+      c.decision === "accepted"
+        ? "acc"
+        : c.decision === "rejected"
+          ? "rej"
+          : c.decision === "edited"
+            ? "edit"
+            : "open";
+    return (
+      <div
+        id={`rl-${c.clause_id}`}
+        className={`rl ${sel === c.clause_id ? "sel" : ""}`}
+      >
+        <div
+          className="rl-head"
+          onClick={() =>
+            sel === c.clause_id ? setSel(null) : select(c.clause_id)
+          }
+        >
+          <h3>
+            {c.number ? `${c.number}. ` : ""}
+            {c.heading ?? "Clause"}
+          </h3>
+          <span className={`rl-state ${stateCls}`}>{stateLabel}</span>
+        </div>
+        {sel === c.clause_id && (
+          <div className="rl-inner">
+            {(c.findings ?? []).map((f, fi) => (
+              <div key={f.finding_id ?? fi} className="mb-3.5">
+                <div className="plainline">{f.plain}</div>
+                <div className="termline">{f.term}</div>
+                <div className="trio">
+                  <div className="wrong">
+                    <b>What is wrong</b>
+                    {f.wrong}
+                  </div>
+                  <div className="change">
+                    <b>What we would change it to</b>
+                    {f.change}
+                  </div>
+                  <div className="ignore">
+                    <b>If you ignore it</b>
+                    {f.ignore}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <Diff c={c} />
+            <div className="who">{caughtBy(c)}</div>
+
+            {!c.decision && editing !== c.clause_id && (
+              <div className="flex gap-2">
+                {c.proposal?.new_text && (
+                  <button
+                    className="act act-acc"
+                    disabled={busy}
+                    onClick={() => decide(c.clause_id, "accepted")}
+                  >
+                    Accept fix
+                  </button>
+                )}
+                <button
+                  className="act act-rej"
+                  disabled={busy}
+                  onClick={() => decide(c.clause_id, "rejected")}
+                >
+                  Keep their wording
+                </button>
+                <button
+                  className="act act-edit"
+                  disabled={busy}
+                  onClick={() => {
+                    setEditing(c.clause_id);
+                    setEditText(c.proposal?.new_text ?? c.text);
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+            )}
+
+            {!c.decision && editing === c.clause_id && (
+              <div className="mt-2.5">
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  className="field w-full min-h-[110px] p-3 text-[13.5px]"
+                />
+                <button
+                  className="act act-acc mt-2"
+                  disabled={busy || !editText.trim()}
+                  onClick={() => decide(c.clause_id, "edited", editText)}
+                >
+                  Use my wording
+                </button>
+              </div>
+            )}
+
+            {c.decision === "accepted" && (
+              <div className="verdict acc">
+                In your redline. The corrected wording replaces theirs in the
+                final document.
+              </div>
+            )}
+            {c.decision === "rejected" && (
+              <div className="verdict rej">
+                Their original wording stays. Papyrus records that you saw the
+                flag and chose to keep it.
+              </div>
+            )}
+            {c.decision === "edited" && (
+              <div className="verdict acc">
+                Your wording goes into the final document: "{c.final_text}"
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <main className="py-7 pb-16">
@@ -555,28 +747,57 @@ export default function Review() {
         </div>
       </div>
 
-      {(s.summary?.executive || s.contract_risk?.why) && (
-        <div className="story">
-          {s.summary?.executive ?? s.contract_risk?.why}
-        </div>
-      )}
-      <RiskSummary s={s} onReport={openReport} />
-      {failed.length > 0 && (
-        <div className="attn-note mb-4">
-          {failed.map((k) => CHECK_NAMES[k]).join(" and ")} did not finish on
-          this contract. The findings below come from the checks that did. Treat
-          the gap as unreviewed, not as clean.
-        </div>
-      )}
       {note && <p className="text-[13px] text-[var(--rust)] mb-3">{note}</p>}
 
-      <div className="grid grid-cols-2 gap-6 items-start">
-        {/* left: their version */}
-        <div className="panel p-7 min-h-[70vh]">
-          <div className="flex justify-between items-baseline mb-5 pb-3 border-b border-[var(--line)]">
-            <h2 className="text-[16px] font-bold">Their version</h2>
-            <span className="label">Original, as received</span>
+      <div className="shell">
+        <RiskRail s={s} onReport={openReport} />
+
+        <div>
+          {(s.summary?.executive || s.contract_risk?.why) && (
+            <div className="story">
+              {s.summary?.executive ?? s.contract_risk?.why}
+            </div>
+          )}
+          {failed.length > 0 && (
+            <div className="attn-note mb-4">
+              {failed.map((k) => CHECK_NAMES[k]).join(" and ")} did not finish
+              on this contract. The findings below come from the checks that
+              did. Treat the gap as unreviewed, not as clean.
+            </div>
+          )}
+
+          <div className="ledger-head">
+            <div>
+              <h2 className="text-[16px] font-bold">Their version</h2>
+              <span className="label">Original, as received</span>
+            </div>
+            <div>
+              <h2 className="text-[16px] font-bold">Your redline</h2>
+              <span className="label">Papyrus proposals, you decide</span>
+            </div>
           </div>
+
+          {(s.missing_clauses ?? []).length > 0 && (
+            <div className="clause-row">
+              <div className="not-present">Not present in their document.</div>
+              <div className="rl">
+                <div className="rl-head">
+                  <h3>Missing from this contract</h3>
+                </div>
+                <div className="rl-inner">
+                  {(s.missing_clauses ?? []).map((m, i) => (
+                    <div key={i} className="mb-3">
+                      <div className="plainline">
+                        {m.plain ?? "A standard clause is missing."}
+                      </div>
+                      <div className="termline">{m.term ?? ""}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {clauses.map((c) => {
             const sev = worstSeverity(c);
             const cls = [
@@ -586,195 +807,29 @@ export default function Review() {
               sel === c.clause_id ? "sel" : "",
             ].join(" ");
             return (
-              <div
-                key={c.clause_id}
-                className={cls}
-                onClick={sev ? () => select(c.clause_id) : undefined}
-              >
-                <h3>
-                  {c.number ? `${c.number}. ` : ""}
-                  {c.heading ?? c.clause_type ?? "Clause"}
-                  {sev && (
-                    <span className={`fmark ${c.decision ? "low" : sev}`}>
-                      {c.decision
-                        ? "Decided"
-                        : sev === "high"
-                          ? "Serious"
-                          : sev === "med"
-                            ? "Worth a look"
-                            : "Minor"}
-                    </span>
-                  )}
-                </h3>
-                <p>{c.text}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* right: your redline. NO panel class on purpose: the proposal
-            cards inside are each raised, and a raised box holding raised
-            cards reads as mud. */}
-        <div className="pt-7 min-h-[70vh]">
-          <div className="flex justify-between items-baseline mb-5 pb-3 border-b border-[var(--line)]">
-            <h2 className="text-[16px] font-bold">Your redline</h2>
-            <span className="label">Papyrus proposals, you decide</span>
-          </div>
-
-          {(s.missing_clauses ?? []).length > 0 && (
-            <div className="rl">
-              <div className="rl-head">
-                <h3>Missing from this contract</h3>
-              </div>
-              <div className="rl-inner">
-                {(s.missing_clauses ?? []).map((m, i) => (
-                  <div key={i} className="mb-3">
-                    <div className="plainline">
-                      {m.plain ?? "A standard clause is missing."}
-                    </div>
-                    <div className="termline">{m.term ?? ""}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {clauses.map((c) => {
-            const sev = worstSeverity(c);
-            if (!sev) {
-              return (
-                <div key={c.clause_id} className="rl">
-                  <div className="rl-quiet">
-                    {c.number ? `${c.number}. ` : ""}
-                    {c.heading ?? "Clause"}: looks standard, no change proposed.
-                  </div>
-                </div>
-              );
-            }
-            const stateLabel =
-              c.decision === "accepted"
-                ? "Accepted"
-                : c.decision === "rejected"
-                  ? "Kept as-is"
-                  : c.decision === "edited"
-                    ? "Your wording"
-                    : "Your call";
-            const stateCls =
-              c.decision === "accepted"
-                ? "acc"
-                : c.decision === "rejected"
-                  ? "rej"
-                  : c.decision === "edited"
-                    ? "edit"
-                    : "open";
-            return (
-              <div
-                key={c.clause_id}
-                id={`rl-${c.clause_id}`}
-                className={`rl ${sel === c.clause_id ? "sel" : ""}`}
-              >
-                <div className="rl-head" onClick={() => select(c.clause_id)}>
+              <div key={c.clause_id} className="clause-row">
+                <div
+                  className={cls}
+                  onClick={sev ? () => select(c.clause_id) : undefined}
+                >
                   <h3>
                     {c.number ? `${c.number}. ` : ""}
-                    {c.heading ?? "Clause"}
+                    {c.heading ?? c.clause_type ?? "Clause"}
+                    {sev && (
+                      <span className={`fmark ${c.decision ? "low" : sev}`}>
+                        {c.decision
+                          ? "Decided"
+                          : sev === "high"
+                            ? "Serious"
+                            : sev === "med"
+                              ? "Worth a look"
+                              : "Minor"}
+                      </span>
+                    )}
                   </h3>
-                  <span className={`rl-state ${stateCls}`}>{stateLabel}</span>
+                  <p>{c.text}</p>
                 </div>
-                {sel === c.clause_id && (
-                  <div className="rl-inner">
-                    {(c.findings ?? []).map((f, fi) => (
-                      <div key={f.finding_id ?? fi} className="mb-3.5">
-                        <div className="plainline">{f.plain}</div>
-                        <div className="termline">{f.term}</div>
-                        <div className="trio">
-                          <div className="wrong">
-                            <b>What is wrong</b>
-                            {f.wrong}
-                          </div>
-                          <div className="change">
-                            <b>What we would change it to</b>
-                            {f.change}
-                          </div>
-                          <div className="ignore">
-                            <b>If you ignore it</b>
-                            {f.ignore}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <Diff c={c} />
-                    <div className="who">{caughtBy(c)}</div>
-
-                    {!c.decision && editing !== c.clause_id && (
-                      <div className="flex gap-2">
-                        {c.proposal?.new_text && (
-                          <button
-                            className="act act-acc"
-                            disabled={busy}
-                            onClick={() => decide(c.clause_id, "accepted")}
-                          >
-                            Accept fix
-                          </button>
-                        )}
-                        <button
-                          className="act act-rej"
-                          disabled={busy}
-                          onClick={() => decide(c.clause_id, "rejected")}
-                        >
-                          Keep their wording
-                        </button>
-                        <button
-                          className="act act-edit"
-                          disabled={busy}
-                          onClick={() => {
-                            setEditing(c.clause_id);
-                            setEditText(c.proposal?.new_text ?? c.text);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    )}
-
-                    {!c.decision && editing === c.clause_id && (
-                      <div className="mt-2.5">
-                        <textarea
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
-                          className="field w-full min-h-[110px] p-3 text-[13.5px]"
-                        />
-                        <button
-                          className="act act-acc mt-2"
-                          disabled={busy || !editText.trim()}
-                          onClick={() =>
-                            decide(c.clause_id, "edited", editText)
-                          }
-                        >
-                          Use my wording
-                        </button>
-                      </div>
-                    )}
-
-                    {c.decision === "accepted" && (
-                      <div className="verdict acc">
-                        In your redline. The corrected wording replaces theirs
-                        in the final document.
-                      </div>
-                    )}
-                    {c.decision === "rejected" && (
-                      <div className="verdict rej">
-                        Their original wording stays. Papyrus records that you
-                        saw the flag and chose to keep it.
-                      </div>
-                    )}
-                    {c.decision === "edited" && (
-                      <div className="verdict acc">
-                        Your wording goes into the final document: "
-                        {c.final_text}"
-                      </div>
-                    )}
-                  </div>
-                )}
+                {redlineCell(c)}
               </div>
             );
           })}

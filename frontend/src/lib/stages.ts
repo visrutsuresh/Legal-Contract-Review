@@ -8,3 +8,13 @@ export const STAGE_LINES: Record<string, string> = {
   summarising: "Writing the plain-English report…",
   done: "Wrapping up…",
 };
+
+// the pipeline's stages in the order they run, so the UI can show "step 3 of 6"
+export const STAGE_ORDER = [
+  "reading",
+  "extracting",
+  "inspecting",
+  "negotiating",
+  "summarising",
+  "done",
+];

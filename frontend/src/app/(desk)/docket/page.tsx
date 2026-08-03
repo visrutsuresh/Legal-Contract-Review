@@ -152,7 +152,7 @@ function DocketRow({
 
   if (r.status === "processing") {
     return (
-      <div className={grid} style={style}>
+      <div className={`${grid} click`} style={style} onClick={onOpen}>
         {name(`Received ${when}`)}
         <span className="badge working">Working</span>
         <span className="flex items-center gap-2.5 text-[13.5px] text-[var(--ink-soft)]">
@@ -160,7 +160,12 @@ function DocketRow({
           {STAGE_LINES[r.stage ?? ""] ?? "Working on it…"}
         </span>
         <span />
-        <span />
+        <span
+          className="text-[13px] font-bold text-[var(--accent)]"
+          style={{ fontFamily: "var(--font-cabinet)" }}
+        >
+          Watch progress →
+        </span>
       </div>
     );
   }

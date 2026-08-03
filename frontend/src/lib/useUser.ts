@@ -32,5 +32,6 @@ export async function login(identifier: string, password: string) {
 }
 
 export async function logout() {
-  await api("/auth/logout", { method: "POST" });
+  // a 401 here just means the cookie already expired; either way you're out
+  await api("/auth/logout", { method: "POST" }).catch(() => null);
 }
