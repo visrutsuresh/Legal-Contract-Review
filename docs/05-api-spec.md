@@ -4,11 +4,16 @@
 
 ## 1. Authentication and roles
 
-Sessions are a signed cookie. Two roles: `lawyer` and `admin`. **There is no open signup**; an administrator creates every account. Every endpoint below except health and configuration requires a signed-in account.
+Sessions are a signed cookie. Two roles: `lawyer` and `admin`. **There is no open signup**; an administrator creates every account. Every endpoint below except health, configuration and the two first-run setup routes requires a signed-in account.
+
+The one exception to "an administrator creates every account" is the **first-run bootstrap**. A freshly installed system has no accounts, therefore no administrator, therefore no way to create the first one. `GET /auth/needs-setup` reports that state and `POST /auth/bootstrap` closes it by creating the founding administrator. The bootstrap route refuses with 403 the moment any account exists, so the door opens once and never again.
 
 | Method | Path | Who | Notes |
 |---|---|---|---|
-| POST | `/auth/login` | anyone | Form credentials, returns a session cookie |
+| POST | `/auth/login` | anyone | Form credentials (email address), returns a session cookie |
+| POST | `/auth/login-flex` | anyone | Same, but the identifier may be **either** the email address or the username, matched case-blind. This is what the sign-in screen posts to |
+| GET | `/auth/needs-setup` | anyone | `{"needs_setup": true}` only while the system holds zero accounts |
+| POST | `/auth/bootstrap` | anyone, once | Creates the founding administrator from email, username and password. 403 once any account exists, 409 on a duplicate address |
 | POST | `/auth/logout` | signed in | Ends the session |
 | GET | `/users/me` | signed in | The current account and its role |
 
@@ -82,9 +87,13 @@ Clauses whose original wording could not be located in the document are named in
 
 | Method | Path | Who | Notes |
 |---|---|---|---|
+The People screen is the administrator's landing page after sign-in and is the only place accounts are made. An administrator can create administrators as well as lawyers.
+
+| Method | Path | Who | Notes |
+|---|---|---|---|
 | GET | `/users` | admin | All accounts |
-| POST | `/users` | admin | Create an account. 422 if the role is not lawyer or admin, 409 if the address already exists |
-| PATCH | `/users/{id}` | admin | Change role, address or password. 404 unknown, 409 duplicate address, 422 bad role |
+| POST | `/users` | admin | Create an account from email, username, password and role. 422 if the role is not lawyer or admin, 409 if either the address **or the username** already exists |
+| PATCH | `/users/{id}` | admin | Change role, address, username or password. 404 unknown, 409 duplicate address or username, 422 bad role |
 | DELETE | `/users/{id}` | admin | Deactivate. 400 if you attempt it on your own account |
 
 ## 8. Status codes used

@@ -32,7 +32,23 @@ export default function DeskLayout({
   }
 
   if (loading || !user)
-    return <main className="min-h-[100dvh] bg-[var(--parchment)]" />;
+    // never a silent blank page: a sleeping free-tier backend can take up to a
+    // minute to wake, and this is what the visitor stares at meanwhile
+    return (
+      <main className="min-h-[100dvh] bg-[var(--parchment)] flex items-center justify-center">
+        <div className="text-center">
+          <div
+            className="text-[24px] font-extrabold animate-pulse"
+            style={{ fontFamily: "var(--font-cabinet)" }}
+          >
+            PAPYRUS<span className="text-[var(--accent)]">.</span>
+          </div>
+          <p className="label text-[var(--ink-soft)] mt-3">
+            WAKING THE SERVICE UP · THIS CAN TAKE A MINUTE
+          </p>
+        </div>
+      </main>
+    );
   const onDocket = pathname === "/docket" || pathname.startsWith("/contracts");
   const onPeople = pathname === "/admin";
   const linkCls = (on: boolean) =>
@@ -54,11 +70,11 @@ export default function DeskLayout({
             <span className="text-[var(--accent)]">.</span>
           </div>
           <nav className="flex gap-6 ml-6">
-            {user.role !== "admin" && (
-              <Link href="/docket" className={linkCls(onDocket)}>
-                Docket
-              </Link>
-            )}
+            {/* admins see the docket too: the founding admin from first-run setup
+                would otherwise have exactly one screen and no way into the product */}
+            <Link href="/docket" className={linkCls(onDocket)}>
+              Docket
+            </Link>
             {user.role === "admin" && (
               <Link href="/admin" className={linkCls(onPeople)}>
                 People

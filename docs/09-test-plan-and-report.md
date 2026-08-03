@@ -14,10 +14,10 @@ The automated layer drives the application without starting it, with the model r
 ## 2. Running them
 
 ```bash
-uv run python -m pytest tests/ -q
+uv run pytest -q
 ```
 
-Use `python -m pytest`, not `pytest` alone, or collection fails to find the application package.
+All 103 are collected with or without a database. The eleven storage tests talk to a real Postgres and skip themselves individually when there is none, so a run with the containers down reports **97 passed, 6 skipped** rather than pretending to be complete.
 
 ## 3. Coverage
 
@@ -36,7 +36,9 @@ Use `python -m pytest`, not `pytest` alone, or collection fails to find the appl
 | `test_export.py` | 4 | Document rewriting, including clauses that cannot be located |
 | `test_vocabulary.py` | 2 | That no vocabulary from the sibling ticket system leaked into this one, with a small allowlist for legitimate legal English |
 
-**Last recorded run: 103 passed.**
+**Last recorded run: 103 collected, 97 passed and 6 skipped with the database down; 103 passed with it up.**
+
+A defect worth recording, because it is the kind that hides: `test_api.py` guards its import of the application and skipped the whole module when that import failed. `store.init_db()` used to run when `api.py` was merely imported, so on any machine without Postgres, including the CI runner, **those seventeen endpoint tests silently vanished and the suite still reported green**. `init_db()` now runs in the startup handler instead of at import, exactly as the sibling governance system already did it, and the seventeen are back in every run.
 
 ## 4. What testing has caught
 

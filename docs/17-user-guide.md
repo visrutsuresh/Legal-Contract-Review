@@ -4,7 +4,9 @@
 
 ## 1. Signing in
 
-There is no self-service signup. An administrator creates your account and gives you the address and password. Sign in and you land on the docket.
+There is no self-service signup. An administrator creates your account and gives you the address and password. You may sign in with **either your email address or your username**; capitals do not matter. Lawyers land on the docket, administrators land on the people page.
+
+**The very first time the system is ever started**, there are no accounts at all, so there is nobody to create yours. The sign-in screen notices this and turns itself into a one-time setup form: fill in an email address, a username and a password, and it creates the founding administrator. That administrator then creates everyone else. Once a single account exists this screen never appears again, and the setup route refuses anyone who tries it later.
 
 ## 2. The docket
 
@@ -69,7 +71,9 @@ Every step the system took is recorded in a chain where each entry is sealed aga
 
 ## 7. For administrators
 
-The people page creates accounts, changes roles between lawyer and administrator, resets an address or password, and deactivates an account. You cannot deactivate your own account.
+The people page is where an administrator lands after signing in. It creates accounts, changes roles between lawyer and administrator, resets an address, username or password, and deactivates an account. You cannot deactivate your own account. An administrator can create other administrators.
+
+Administrators can also open the docket and read reviews. The docket is shared, not a second copy: an administrator sees the same contracts the lawyers do.
 
 ## 8. Worth knowing
 

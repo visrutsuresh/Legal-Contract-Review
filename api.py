@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users.exceptions import UserAlreadyExists
 from fastapi_users.password import PasswordHelper
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
@@ -30,10 +30,9 @@ from app.users import (
     session_maker,
 )
 
-store.init_db()  # make sure the contracts table exists when the API boots
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    store.init_db()  # tables exist when the API BOOTS, not when this module imports, so tests can drive it without a database
     await create_user_table()
     try:
         precedent.ensure_collection()  # label the Weaviate drawer (Task 29) on a fresh machine
@@ -87,7 +86,11 @@ async def needs_setup():
 
 
 class BootstrapIn(BaseModel):
-    email: str = Field(min_length=3, max_length=254)
+    # EmailStr, not str: UserCreate validates the address further down, and a plain
+    # str would let that ValidationError escape the handler as a 500. The founding
+    # admin mistyping their own address is the likeliest error on this screen, and
+    # it must read as "that is not a valid address", not "Internal Server Error".
+    email: EmailStr
     username: str = Field(min_length=3, max_length=40)
     password: str = Field(min_length=8, max_length=200)
 
