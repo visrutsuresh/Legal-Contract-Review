@@ -59,7 +59,16 @@ async def get_user_manager(user_db=Depends(get_user_db)):
     yield UserManager(user_db)
 
 
-cookie_transport = CookieTransport(cookie_name="papyrus", cookie_max_age=60 * 60 * 24 * 7, cookie_secure=False)
+# local dev: secure off, samesite lax. Deployed, where the front end and the API sit on
+# different domains, set COOKIE_SECURE=true and COOKIE_SAMESITE=none, or the session
+# cookie is silently dropped and login appears to do nothing. Defaults match the
+# previous hardcoded behaviour, so local development is unchanged.
+cookie_transport = CookieTransport(
+    cookie_name="papyrus",
+    cookie_max_age=60 * 60 * 24 * 7,
+    cookie_secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
+    cookie_samesite=os.getenv("COOKIE_SAMESITE", "lax"),
+)
 
 
 def get_jwt_strategy() -> JWTStrategy:

@@ -43,9 +43,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Papyrus Contract Review API", lifespan=lifespan)
 
+# comma-separated list, e.g. "https://papyrus.vercel.app,http://localhost:3000"
+CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -115,6 +118,29 @@ async def bootstrap_admin(payload: BootstrapIn):
 @app.get("/")
 def health():
     return {"status": "ok", "product": "papyrus"}
+
+
+@app.get("/healthz")
+def healthz():
+    # the honest health check: touches each dependency instead of just answering.
+    # / stays instant for uptime pings; this one is for humans and deploy gates.
+    # Named to match the sibling systems so all three answer the same way.
+    out = {"api": "ok"}
+    # up/down only, no exception text: this route is unauthenticated and driver
+    # errors would leak host and user strings to anyone who asks
+    try:
+        with store._connect() as conn:
+            conn.execute("SELECT 1")
+        out["postgres"] = "ok"
+    except Exception:
+        out["postgres"] = "down"
+    try:
+        precedent._client().close()
+        out["weaviate"] = "ok"
+    except Exception:
+        out["weaviate"] = "down"
+    out["status"] = "ok" if out["postgres"] == "ok" and out["weaviate"] == "ok" else "degraded"
+    return out
 
 
 @app.get("/config")

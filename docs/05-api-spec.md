@@ -21,7 +21,8 @@ The one exception to "an administrator creates every account" is the **first-run
 
 | Method | Path | Returns |
 |---|---|---|
-| GET | `/` | Health |
+| GET | `/` | Liveness. Answers instantly without touching anything, so it is safe for uptime pings |
+| GET | `/healthz` | The honest check: opens Postgres and Weaviate and reports each as `ok` or `down`, with `status` `ok` or `degraded`. Reports up or down only, never the error text, because the route is unauthenticated and driver errors leak host and user strings |
 | GET | `/config` | Brand name and tagline |
 
 ## 3. Contracts

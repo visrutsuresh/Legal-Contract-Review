@@ -17,6 +17,8 @@
 | `PRIVATE_LANE_URL` | yes | HTTPS endpoint of the self-hosted model |
 | `PRIVATE_LANE_TOKEN` | yes | Shared secret that endpoint requires |
 | `BRAND_NAME`, `BRAND_TAGLINE` | no | Branding shown in the interface |
+| `CORS_ORIGINS` | no | Comma-separated origins the browser may call the API from, exact origin and no trailing slash. Defaults to `http://localhost:3000` |
+| `COOKIE_SECURE`, `COOKIE_SAMESITE` | no | Default to `false` and `lax`, which is what local development wants. Deployed, with the front end and the API on different domains, they must be `true` and `none` or the session cookie is silently dropped and login appears to do nothing |
 
 The same lane endpoint and token are shared with the sibling governance system. Both projects point at one deployment, which is why a blank value in one repository is a common and confusing failure: the review dies before the GPU is ever reached, with a message about an invalid address.
 
