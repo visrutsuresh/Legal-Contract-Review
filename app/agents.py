@@ -2,6 +2,18 @@ from app import router
 from app.agents_base import _parse, react
 from app.state import valid_finding
 
+# --- generation budget, per agent --------------------------------------------
+# One blanket 4096 was sized for the worst case (an inspector emitting several
+# findings) and then charged to every agent. Each number is the smallest that
+# fits that agent's finish JSON with slack for its reasoning line.
+TOKENS = {
+    "extraction": 4096,   # the whole clause list, the longest answer here
+    "inspector": 4096,    # several findings, each with the five-field trio
+    "negotiation": 4096,  # full replacement wording per flagged clause
+    "counsel": 1024,      # a verdict, a reason, and what it did
+}
+
+
 CLAUSE_TYPES = {
     "parties",
     "scope",
@@ -84,7 +96,7 @@ def extraction_agent(raw_text: str) -> dict:
     for attempt in range(2):
         ask = prompt if attempt == 0 else (f"{prompt}\n\nYour previous reply was not valid JSON ({last_err}). Reply again with ONE valid JSON object, nothing else.")
         try:
-            move = _parse(router.think(ask, max_new_tokens=4096))
+            move = _parse(router.think(ask, max_new_tokens=TOKENS["extraction"]))
             break
         except ValueError as e:  # json.JSONDecodeError is a ValueError
             last_err, move = str(e), None
@@ -167,7 +179,7 @@ def _stamp(f, name: str, n: int):
 
 def _run_inspector(name: str, system: str, state: dict, allowed: list[str]) -> tuple[dict, dict]:
     # run one inspector to it finish JSON; keep only findings that pass valid-finding
-    result = react(system, _inspector_context(state), allowed)
+    result = react(system, _inspector_context(state), allowed, max_new_tokens=TOKENS["inspector"])
     raw = result.get("findings", []) or []
     kept, dropped = [], 0
     for n, f in enumerate(raw, start=1):
@@ -377,7 +389,8 @@ def _issue_context(clauses: list, missing_clauses: list) -> str:
 
 
 def negotiation_agent(clauses: list, missing_clauses: list) -> dict:
-    result = react(NEGOTIATION_SYSTEM, _issue_context(clauses, missing_clauses), ["template_fetch", "precedent_search"])
+    result = react(NEGOTIATION_SYSTEM, _issue_context(clauses, missing_clauses), ["template_fetch", "precedent_search"],
+                   max_new_tokens=TOKENS["negotiation"])
     flagged_ids = {c["clause_id"] for c in clauses if c.get("findings")}
     proposals = {}
     for p in result.get("proposals", []):
@@ -446,3 +459,57 @@ def summary_agent(meta: dict, clauses: list, missing_clauses: list, contract_ris
     for name in failed:
         executive += f" Note: {INSPECTOR_PLAIN.get(name, name)} did not finish, so its part of the review is missing."
     return {"executive": executive, "counts": counts}
+
+
+# --- the on-demand counsel agent: the one that ACTS --------------------------
+# Every other agent here writes an opinion into the case file. This one is woken
+# on demand for ONE clause and changes the record with tools. It still cannot
+# accept, reject or edit anything: those three verbs belong to the lawyer.
+
+COUNSEL_SYSTEM = """
+You are the Counsel agent on a legal contract review desk, woken on demand for ONE
+clause the inspectors flagged. You do not write a recommendation for somebody else
+to apply. You DO THE WORK yourself, with tools, then report what you did.
+
+Work in this order:
+  1. Read the clause and its findings. Use rules_read or precedent_search if you
+     need to know how the firm treats this kind of term.
+  2. If any finding on it is severity high, call escalate_clause. A partner has to
+     see it before anyone signs.
+  3. If the clause is worth pushing back on, call request_concession with the exact
+     ask in one sentence. That call is TWO-PHASE: your first call returns a
+     confirm_code and changes nothing, then you call it AGAIN with code=<that code>
+     to commit.
+
+You may NOT accept, reject or edit a clause. The lawyer signs, never you.
+
+Reply every turn with ONE JSON object, nothing else.
+  To use a tool: {"thought": "...", "action": "escalate_clause", "args": {"contract_id": "...", "clause_id": "...", "reason": "..."}}
+             or: {"thought": "...", "action": "request_concession", "args": {"contract_id": "...", "clause_id": "...", "ask": "...", "code": ""}}
+             or: {"thought": "...", "action": "rules_read", "args": {"contract_type": "<type>"}}
+             or: {"thought": "...", "action": "precedent_search", "args": {"query": "<text>"}}
+  To finish:     {"thought": "...", "action": "finish", "result": {"escalated": true, "why": "<one plain sentence>", "actions": ["<what you actually did>"]}}
+Do not repeat a tool call you already made.
+"""
+
+
+def counsel_agent(contract_id: str, clause: dict) -> dict:
+    findings = clause.get("findings") or []
+    context = (
+        f"Contract {contract_id!r}, clause {clause.get('clause_id')!r} "
+        f"({clause.get('clause_type', 'other')}, heading {clause.get('heading', '')!r}).\n"
+        f"Its wording:\n{clause.get('text', '')[:1500]}\n\n"
+        f"What the inspectors found:\n{findings}\n\n"
+        "Pass contract_id and clause_id to every tool exactly as written above."
+    )
+    result = react(
+        COUNSEL_SYSTEM,
+        context,
+        ["rules_read", "precedent_search", "escalate_clause", "request_concession"],
+        max_new_tokens=TOKENS["counsel"],
+    )
+    return {
+        "escalated": bool(result.get("escalated")),
+        "why": str(result.get("why", "")),
+        "actions": [str(a) for a in (result.get("actions") or [])],
+    }

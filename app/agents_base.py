@@ -63,17 +63,27 @@ def _parse(raw: str) -> dict:
         return obj
 
 
-def react(system: str, context: str, allowed_tools: list[str], max_steps: int = MAX_STEPS) -> dict:
+def react(
+    system: str,
+    context: str,
+    allowed_tools: list[str],
+    max_steps: int = MAX_STEPS,
+    max_new_tokens: int = 4096,
+) -> dict:
     """Reason -> act -> observe loop. Returns the agent's finish result dict.
-    Blocks repeated tool call and forces a decision near the cap ( #1 lessons)."""
+    Blocks repeated tool call and forces a decision near the cap ( #1 lessons).
+
+    max_new_tokens is PER AGENT. 4096 was chosen so an inspector's multi-finding
+    JSON could not truncate mid-string, then got charged to every agent including
+    ones whose whole answer is a sentence. Callers pass their size from
+    agents.TOKENS."""
     transcript, cache, redundant = "", {}, 0
     for step in range(max_steps):
         must_finish = redundant >= 2 or step >= max_steps - 1
         # the second sentence matters: small models spot issues in mid-loop thoughts
         # and then forget them at finish time unless told to carry them over
         hint = "\nSTOP calling tools. Reply ONLY with the finish JSON. Include every issue you already identified in your thoughts above as findings." if must_finish else ""
-        # 1024 default truncated multi-finding finish JSON mid-string; 4096 matches extraction
-        move = _parse(router.think(f"{system}\n\n{context}\n{transcript}{hint}\nYour JSON:", max_new_tokens=4096))
+        move = _parse(router.think(f"{system}\n\n{context}\n{transcript}{hint}\nYour JSON:", max_new_tokens=max_new_tokens))
         action = move.get("action")
         if action == "finish":
             return move.get("result", {})

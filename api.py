@@ -15,6 +15,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from app import audit, export, precedent, store
+from app.agents import counsel_agent
 from app.graph import PENDING_FILES, graph, initial_state, submit
 from app.schemas import UserCreate, UserUpdate
 from app.users import (
@@ -283,6 +284,38 @@ def decide(contract_id: str, clause_id: str, payload: DecisionIn, user: User = D
     if updated is None:
         raise HTTPException(status_code=404, detail="clause not found")
     return {"contract_id": contract_id, "clause": updated}
+
+
+@app.post("/contracts/{contract_id}/clauses/{clause_id}/counsel")
+def counsel(contract_id: str, clause_id: str, user: User = Depends(require_lawyer)):
+    """Wake the counsel agent on ONE flagged clause. Unlike every other agent here
+    it CHANGES the record: it escalates to senior counsel and records the ask it
+    wants put to the counterparty, both hash-chained. It still cannot accept,
+    reject or edit anything, so the lawyer's signature is still the only way a
+    clause changes wording."""
+    state = store.get(contract_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="contract not found")
+    if state.get("status") == "reviewed":
+        raise HTTPException(status_code=409, detail="this review is already finished")
+    clause = next((c for c in state.get("clauses", []) if c.get("clause_id") == clause_id), None)
+    if clause is None:
+        raise HTTPException(status_code=404, detail="clause not found")
+    if not (clause.get("findings") or []):
+        raise HTTPException(status_code=422, detail="nothing was flagged on this clause, so there is nothing to counsel on")
+    out = counsel_agent(contract_id, clause)
+    # the agent wrote through its own tools, so re-read rather than saving our
+    # stale snapshot over the top of its work
+    fresh = store.get(contract_id) or state
+    clause = next((c for c in fresh.get("clauses", []) if c.get("clause_id") == clause_id), clause)
+    return {
+        "contract_id": contract_id,
+        "clause_id": clause_id,
+        **out,
+        "escalation": clause.get("escalated"),
+        "concession_ask": clause.get("concession_ask"),
+    }
+
 
 def _assemble(clauses: list) -> str:
     # the reviewed document: every clause's final wording, in order, under its numbered heading
