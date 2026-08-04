@@ -1,24 +1,23 @@
 {
-  "STALE": "SUPERSEDED 2026-08-04. These numbers were measured over 13 contracts. The corpus is now 15: msa_ferrow and vendor_calderwood were added so the parties, boilerplate, governing_law and indemnity clause types carry planted defects, which they did not before. The original 13 manifests are byte-identical, so every per-contract score below still stands; only the AGGREGATE (recall 87.5%, attribution 71.4%, severity 62.9%) is now computed over the wrong population. Re-run `uv run python bench.py` on a warm lane before quoting the headline figures again. Until then, quote them as 'measured over 13 of the 15 contracts'.",
   "config": "full",
   "contract_timeout_s": 2700,
   "totals": {
-    "contracts": 13,
+    "contracts": 15,
     "errors": 0,
-    "extraction_ok": 13,
-    "planted": 40,
-    "found": 35,
-    "recall": 0.875,
-    "inspector_rate": 0.7142857142857143,
-    "severity_rate": 0.6285714285714286,
-    "findings_total": 109,
-    "unplanted_findings": 25,
-    "unplanted_rate": 0.22935779816513763,
-    "missing_expected": 3,
-    "missing_found": 3,
-    "missing_reported": 24,
-    "avg_latency_s": 429.0,
-    "total_latency_s": 5577.3
+    "extraction_ok": 15,
+    "planted": 47,
+    "found": 40,
+    "recall": 0.851063829787234,
+    "inspector_rate": 0.7,
+    "severity_rate": 0.625,
+    "findings_total": 127,
+    "unplanted_findings": 34,
+    "unplanted_rate": 0.2677165354330709,
+    "missing_expected": 4,
+    "missing_found": 4,
+    "missing_reported": 27,
+    "avg_latency_s": 301.5,
+    "total_latency_s": 4522.3
   },
   "rows": [
     {
@@ -42,7 +41,7 @@
       "missing_found": 1,
       "missing_reported": 1,
       "risk_level": "high",
-      "latency_s": 562.0,
+      "latency_s": 354.8,
       "detail": [
         {
           "id": "emp-bonus-guaranteed",
@@ -145,14 +144,14 @@
       "inspector_rate": null,
       "severity_ok": 0,
       "severity_rate": null,
-      "findings_total": 4,
-      "unplanted_findings": 4,
+      "findings_total": 3,
+      "unplanted_findings": 3,
       "unplanted_rate": 1.0,
       "missing_expected": 0,
       "missing_found": 0,
       "missing_reported": 1,
-      "risk_level": "high",
-      "latency_s": 290.6,
+      "risk_level": "medium",
+      "latency_s": 225.1,
       "detail": []
     },
     {
@@ -176,7 +175,7 @@
       "missing_found": 1,
       "missing_reported": 1,
       "risk_level": "high",
-      "latency_s": 450.1,
+      "latency_s": 292.9,
       "detail": [
         {
           "id": "msa-pay-interest8",
@@ -259,6 +258,90 @@
       ]
     },
     {
+      "file": "msa_ferrow.docx",
+      "contract_type": "msa",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 14,
+      "planted": 4,
+      "found": 3,
+      "recall": 0.75,
+      "inspector_ok": 1,
+      "inspector_rate": 0.3333333333333333,
+      "severity_ok": 2,
+      "severity_rate": 0.6666666666666666,
+      "findings_total": 9,
+      "unplanted_findings": 4,
+      "unplanted_rate": 0.4444444444444444,
+      "missing_expected": 0,
+      "missing_found": 0,
+      "missing_reported": 2,
+      "risk_level": "high",
+      "latency_s": 453.5,
+      "detail": [
+        {
+          "id": "cov-parties-undisclosed",
+          "number": "1",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": true,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "low",
+            "medium"
+          ]
+        },
+        {
+          "id": "cov-indemnity-uncapped",
+          "number": "8",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "risk",
+          "got_inspectors": [
+            "risk"
+          ],
+          "expected_severity": "high",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "cov-gov-arbitration",
+          "number": "12",
+          "found": true,
+          "inspector_ok": false,
+          "severity_ok": false,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high"
+          ]
+        },
+        {
+          "id": "cov-boiler-unilateral",
+          "number": "14",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "risk",
+          "got_inspectors": [],
+          "expected_severity": "high",
+          "got_severities": []
+        }
+      ]
+    },
+    {
       "file": "msa_novabright.docx",
       "contract_type": "msa",
       "status": "needs_review",
@@ -277,9 +360,9 @@
       "unplanted_rate": 0.0,
       "missing_expected": 0,
       "missing_found": 0,
-      "missing_reported": 3,
+      "missing_reported": 2,
       "risk_level": "high",
-      "latency_s": 389.1,
+      "latency_s": 346.1,
       "detail": [
         {
           "id": "msa-pay-net120",
@@ -374,14 +457,14 @@
       "inspector_rate": null,
       "severity_ok": 0,
       "severity_rate": null,
-      "findings_total": 7,
-      "unplanted_findings": 7,
+      "findings_total": 9,
+      "unplanted_findings": 9,
       "unplanted_rate": 1.0,
       "missing_expected": 0,
       "missing_found": 0,
-      "missing_reported": 0,
+      "missing_reported": 1,
       "risk_level": "high",
-      "latency_s": 678.8,
+      "latency_s": 440.6,
       "detail": []
     },
     {
@@ -405,7 +488,7 @@
       "missing_found": 0,
       "missing_reported": 0,
       "risk_level": "low",
-      "latency_s": 219.9,
+      "latency_s": 199.6,
       "detail": []
     },
     {
@@ -429,7 +512,7 @@
       "missing_found": 0,
       "missing_reported": 1,
       "risk_level": "high",
-      "latency_s": 408.9,
+      "latency_s": 257.6,
       "detail": [
         {
           "id": "nda-conf-carveout",
@@ -538,7 +621,7 @@
       "missing_found": 0,
       "missing_reported": 3,
       "risk_level": "high",
-      "latency_s": 417.7,
+      "latency_s": 255.5,
       "detail": [
         {
           "id": "nda-scope-oneway",
@@ -643,7 +726,7 @@
       "missing_found": 0,
       "missing_reported": 0,
       "risk_level": "high",
-      "latency_s": 415.0,
+      "latency_s": 247.7,
       "detail": []
     },
     {
@@ -667,7 +750,7 @@
       "missing_found": 0,
       "missing_reported": 4,
       "risk_level": "high",
-      "latency_s": 449.4,
+      "latency_s": 285.5,
       "detail": [
         {
           "id": "sow-scope-unilateral",
@@ -773,7 +856,7 @@
       "missing_found": 0,
       "missing_reported": 1,
       "risk_level": "high",
-      "latency_s": 419.6,
+      "latency_s": 307.8,
       "detail": []
     },
     {
@@ -797,7 +880,7 @@
       "missing_found": 0,
       "missing_reported": 6,
       "risk_level": "high",
-      "latency_s": 429.4,
+      "latency_s": 263.7,
       "detail": [
         {
           "id": "ven-supply-asis",
@@ -877,6 +960,75 @@
       ]
     },
     {
+      "file": "vendor_calderwood.docx",
+      "contract_type": "vendor",
+      "status": "needs_review",
+      "error": null,
+      "extraction_ok": true,
+      "clauses": 12,
+      "planted": 3,
+      "found": 2,
+      "recall": 0.6666666666666666,
+      "inspector_ok": 2,
+      "inspector_rate": 1.0,
+      "severity_ok": 1,
+      "severity_rate": 0.5,
+      "findings_total": 8,
+      "unplanted_findings": 4,
+      "unplanted_rate": 0.5,
+      "missing_expected": 1,
+      "missing_found": 1,
+      "missing_reported": 1,
+      "risk_level": "high",
+      "latency_s": 314.8,
+      "detail": [
+        {
+          "id": "cov-parties-authority",
+          "number": "1",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": true,
+          "expected_inspector": "template",
+          "got_inspectors": [
+            "template"
+          ],
+          "expected_severity": "low",
+          "got_severities": [
+            "low"
+          ]
+        },
+        {
+          "id": "cov-indemnity-noticebar",
+          "number": "9",
+          "found": true,
+          "inspector_ok": true,
+          "severity_ok": false,
+          "expected_inspector": "compliance",
+          "got_inspectors": [
+            "compliance",
+            "risk",
+            "template"
+          ],
+          "expected_severity": "medium",
+          "got_severities": [
+            "high",
+            "low"
+          ]
+        },
+        {
+          "id": "cov-boiler-noassign",
+          "number": "12",
+          "found": false,
+          "inspector_ok": null,
+          "severity_ok": null,
+          "expected_inspector": "template",
+          "got_inspectors": [],
+          "expected_severity": "medium",
+          "got_severities": []
+        }
+      ]
+    },
+    {
       "file": "vendor_larkspur.docx",
       "contract_type": "vendor",
       "status": "needs_review",
@@ -897,7 +1049,7 @@
       "missing_found": 1,
       "missing_reported": 3,
       "risk_level": "high",
-      "latency_s": 446.8,
+      "latency_s": 277.1,
       "detail": [
         {
           "id": "ven-price-anytime",

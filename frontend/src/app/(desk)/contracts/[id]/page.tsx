@@ -36,6 +36,8 @@ type Clause = {
   proposal?: Proposal | null;
   decision?: "accepted" | "rejected" | "edited" | null;
   final_text?: string;
+  escalated?: { reason: string; by: string } | null;
+  concession_ask?: { ask: string; by: string } | null;
 };
 
 type Detail = {
@@ -392,6 +394,20 @@ export default function Review() {
     }
   }
 
+  async function askCounsel(cid: string) {
+    setBusy(true);
+    setNote("Asking counsel. This wakes the model, so give it a minute or two.");
+    try {
+      await api(`/contracts/${id}/clauses/${cid}/counsel`, { method: "POST" });
+      setNote("");
+      load();
+    } catch (e) {
+      setNote(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function downloadDocx() {
     setNote("");
     try {
@@ -646,6 +662,17 @@ export default function Review() {
             <Diff c={c} />
             <div className="who">{caughtBy(c)}</div>
 
+            {c.escalated && (
+              <div className="mt-2 text-[12.5px]">
+                <b>Escalated to senior counsel</b> by {c.escalated.by}. {c.escalated.reason}
+              </div>
+            )}
+            {c.concession_ask && (
+              <div className="mt-1 text-[12.5px]">
+                <b>Ask recorded:</b> {c.concession_ask.ask}
+              </div>
+            )}
+
             {!c.decision && editing !== c.clause_id && (
               <div className="flex gap-2">
                 {c.proposal?.new_text && (
@@ -674,6 +701,15 @@ export default function Review() {
                 >
                   Edit
                 </button>
+                {c.findings?.length && !c.escalated ? (
+                  <button
+                    className="act act-edit"
+                    disabled={busy}
+                    onClick={() => askCounsel(c.clause_id)}
+                  >
+                    Ask counsel
+                  </button>
+                ) : null}
               </div>
             )}
 

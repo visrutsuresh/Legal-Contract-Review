@@ -283,6 +283,18 @@ def decide(contract_id: str, clause_id: str, payload: DecisionIn, user: User = D
     updated = store.decide_clause(contract_id, clause_id, payload.verdict, final_text)
     if updated is None:
         raise HTTPException(status_code=404, detail="clause not found")
+    # the human's sign-off belongs on the chain exactly like the agent's actions.
+    # re-read first: decide_clause patched the blob, so our copy is already stale
+    # and saving it would undo the decision we just wrote.
+    fresh = store.get(contract_id)
+    if fresh is not None:
+        label = clause.get("number") or clause_id
+        fresh["audit"] = audit.chain_as(
+            fresh.get("audit") or [],
+            [f"decision {payload.verdict}: clause {label}"],
+            by=user.email,
+        )
+        store.save(fresh)
     return {"contract_id": contract_id, "clause": updated}
 
 
@@ -346,6 +358,12 @@ def finish_review(contract_id: str, user: User = Depends(require_lawyer)):
 
     clauses = state.get("clauses", [])
     document = _assemble(clauses)
+    state["audit"] = audit.chain_as(
+        state.get("audit") or [],
+        [f"review finished: {len(clauses)} clauses signed off"],
+        by=user.email,
+    )
+    store.save(state)              # writes the chain while status is still needs_review
     store.set_status(contract_id, "reviewed")
 
     decisions = [c.get("decision") for c in clauses if c.get("findings")]
