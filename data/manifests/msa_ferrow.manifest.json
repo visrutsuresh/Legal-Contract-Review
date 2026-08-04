@@ -1,0 +1,42 @@
+{
+  "file": "msa_ferrow.docx",
+  "contract_type": "msa",
+  "planted": [
+    {
+      "id": "cov-parties-undisclosed",
+      "number": "1",
+      "clause_type": "parties",
+      "heading": "Parties",
+      "severity": "medium",
+      "inspector": "compliance",
+      "note": "The counterparty may substitute any group company as the contracting entity without telling us."
+    },
+    {
+      "id": "cov-indemnity-uncapped",
+      "number": "8",
+      "clause_type": "indemnity",
+      "heading": "Indemnity",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "We indemnify them for everything, without limit, even when the fault is theirs."
+    },
+    {
+      "id": "cov-gov-arbitration",
+      "number": "12",
+      "clause_type": "governing_law",
+      "heading": "Governing Law",
+      "severity": "medium",
+      "inspector": "compliance",
+      "note": "Any dispute has to be arbitrated abroad, in a seat and language that suit only them."
+    },
+    {
+      "id": "cov-boiler-unilateral",
+      "number": "14",
+      "clause_type": "boilerplate",
+      "heading": "General",
+      "severity": "high",
+      "inspector": "risk",
+      "note": "The counterparty can change the terms of the contract on its own by posting an update."
+    }
+  ]
+}

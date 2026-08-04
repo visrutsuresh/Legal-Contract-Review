@@ -236,8 +236,50 @@ EMPLOYMENT_DEVIATIONS = [
        "Employee to garden leave for that full period."),
 ]
 
+
+# --- coverage set: the clause types the first thirteen never exercised --------
+# parties and boilerplate had ZERO planted defects, governing_law and indemnity
+# had one each. A clause type with no defect is a clause type the inspectors are
+# never scored on, so those four were blind spots in the labelled truth rather
+# than in the code.
+COVERAGE_DEVIATIONS = [
+    _d("cov-parties-undisclosed", "msa", "parties", "Parties", "medium", "compliance",
+       "The counterparty may substitute any group company as the contracting entity without telling us.",
+       "This Agreement is between the Client and the Supplier, provided that the Supplier may at any time and "
+       "without notice novate or assign this Agreement to any entity within its group, and the Client's consent "
+       "shall not be required and need not be sought."),
+    _d("cov-boiler-unilateral", "msa", "boilerplate", "General", "high", "risk",
+       "The counterparty can change the terms of the contract on its own by posting an update.",
+       "The Supplier may amend these terms at any time by publishing an updated version on its website, and such "
+       "amendment shall take effect immediately and bind the Client whether or not the Client has read it. No "
+       "signature or countersignature of the Client is required."),
+    _d("cov-indemnity-uncapped", "msa", "indemnity", "Indemnity", "high", "risk",
+       "We indemnify them for everything, without limit, even when the fault is theirs.",
+       "The Client shall indemnify, defend and hold harmless the Supplier against all claims, losses, damages and "
+       "expenses of any kind whatsoever, without cap or limitation, including those arising from the Supplier's own "
+       "negligence, wilful misconduct or breach of this Agreement."),
+    _d("cov-gov-arbitration", "msa", "governing_law", "Governing Law", "medium", "compliance",
+       "Any dispute has to be arbitrated abroad, in a seat and language that suit only them.",
+       "This Agreement is governed by the laws of the British Virgin Islands. Any dispute shall be referred to "
+       "arbitration seated in Tortola conducted in a language nominated by the Supplier, and the Client irrevocably "
+       "waives any right to bring proceedings in any other forum."),
+    _d("cov-parties-authority", "vendor", "parties", "Parties", "low", "template",
+       "Nobody has confirmed the signatory can actually bind the counterparty.",
+       "This Agreement is entered into by the Supplier acting through any person who presents themselves as "
+       "authorised, and the Supplier gives no warranty that any such person holds authority to bind it."),
+    _d("cov-boiler-noassign", "vendor", "boilerplate", "General", "medium", "template",
+       "We cannot assign the contract even in a group reorganisation, but they can assign it freely.",
+       "The Customer shall not assign, novate or otherwise transfer this Agreement or any part of it under any "
+       "circumstances, including intra-group reorganisation. The Supplier may assign this Agreement freely and "
+       "without notice."),
+    _d("cov-indemnity-noticebar", "vendor", "indemnity", "Indemnity", "medium", "compliance",
+       "Any indemnity claim is barred unless we notice it within five days.",
+       "No indemnity shall be payable unless the Customer gives written notice of the claim within five (5) days of "
+       "the event giving rise to it, time being of the essence, failing which the claim is absolutely barred."),
+]
+
 DEVIATIONS = (NDA_DEVIATIONS + MSA_DEVIATIONS + SOW_DEVIATIONS
-              + VENDOR_DEVIATIONS + EMPLOYMENT_DEVIATIONS)
+              + VENDOR_DEVIATIONS + EMPLOYMENT_DEVIATIONS + COVERAGE_DEVIATIONS)
 CONTRACT_SET = [
     {"file": "nda_halcyon.docx", "contract_type": "nda",
      "counterparty": "Halcyon Logistics Pte Ltd", "deviations": []},
@@ -284,6 +326,18 @@ CONTRACT_SET = [
      "deviations": ["emp-restraint-2y", "emp-bonus-guaranteed", "emp-probation-12m",
                     "emp-ip-moonlight", "emp-term-oneway"],
      "omit": ["Personal Data"]},
+    # the coverage pair: added so parties, boilerplate, governing_law and indemnity
+    # each carry planted defects. The original thirteen are untouched, so their
+    # manifests are byte-identical and their per-contract bench scores still stand.
+    {"file": "msa_ferrow.docx", "contract_type": "msa",
+     "counterparty": "Ferrow Industrial Group Pte Ltd",
+     "deviations": ["cov-parties-undisclosed", "cov-boiler-unilateral",
+                    "cov-indemnity-uncapped", "cov-gov-arbitration"]},
+    {"file": "vendor_calderwood.docx", "contract_type": "vendor",
+     "counterparty": "Calderwood Supply Co Pte Ltd",
+     "deviations": ["cov-parties-authority", "cov-boiler-noassign",
+                    "cov-indemnity-noticebar"],
+     "omit": ["Governing Law"]},
 ]
 def load_clauses(contract_type: str) -> list[dict]:
     path = TEMPLATE_DIR / f"{contract_type}.json"

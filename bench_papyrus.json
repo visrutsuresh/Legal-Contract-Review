@@ -1,4 +1,5 @@
 {
+  "STALE": "SUPERSEDED 2026-08-04. These numbers were measured over 13 contracts. The corpus is now 15: msa_ferrow and vendor_calderwood were added so the parties, boilerplate, governing_law and indemnity clause types carry planted defects, which they did not before. The original 13 manifests are byte-identical, so every per-contract score below still stands; only the AGGREGATE (recall 87.5%, attribution 71.4%, severity 62.9%) is now computed over the wrong population. Re-run `uv run python bench.py` on a warm lane before quoting the headline figures again. Until then, quote them as 'measured over 13 of the 15 contracts'.",
   "config": "full",
   "contract_timeout_s": 2700,
   "totals": {
