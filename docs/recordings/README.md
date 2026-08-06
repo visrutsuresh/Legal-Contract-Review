@@ -6,27 +6,27 @@ lane (Modal), and every lawyer decision shown was actually clicked. Pipeline
 reading and long typing are fast-forwarded 10x; the transcripts mark those
 moments.
 
-- `04-contract-review-walkthrough.mp4` — the full walkthrough (4:06), spliced
-  from the clips below in order, with
-  `04-contract-review-walkthrough-transcript.md` for narration and timestamps.
-- `clips/` — the individual chapters, each with its own transcript:
-  - `04a-upload-and-read` — the MSA goes in as a Word file; the six-stage
-    pipeline reads it (extract, clauses, four parallel inspectors, negotiation
-    angles, report) and lands the verdict screen.
-  - `04b-accept-and-keep` — first flagged clause accepted, second kept as-is;
-    both rulings recorded under the lawyer's name.
-  - `04c-edit-and-counsel` — the lawyer rewrites one clause in their own words,
-    then wakes the senior-counsel agent on a hard one and rules with its ask in
-    hand.
-  - `04d-signoff-and-export` — the hash-chained audit trail verified intact,
-    Finish review, the corrected .docx export, and the printable review report.
-  - `04e-people` — no open signup: the admin creates a lawyer account.
-  - `04f-docket-close` — the NDA goes in; the docket holds the full lifecycle
-    side by side (one signed off, one mid-read).
+- `04-contract-review-walkthrough.mp4` (3:40) — the whole engagement in ONE
+  CONTINUOUS TAKE: one contract, one lawyer session, no cutting between logins.
+  The MSA goes in as a Word file, the six-stage read runs live (10x), the full
+  document is panned top to bottom in one slow scroll, then the four flagged
+  clauses are ruled on with the finding and its redline dwelt on side by side
+  (accept fix, keep their wording, the lawyer's own wording, and an ask-counsel
+  ruling), the hash-chained audit trail is verified intact, the review is
+  finished, the corrected .docx and the printable report are opened, and the
+  only account switch in the film happens on camera: the lawyer signs out, the
+  administrator signs in and creates a lawyer account on the managed roster.
+  `04-contract-review-walkthrough-transcript.md` carries the narration with
+  timestamps.
+- `clips/` — the same journey as six standalone chapters (recorded separately,
+  each with its own transcript), kept for slide embeds and per-feature demos:
+  `04a-upload-and-read`, `04b-accept-and-keep`, `04c-edit-and-counsel`,
+  `04d-signoff-and-export`, `04e-people`, `04f-docket-close`.
+
+Every recording passed a frame-by-frame check against its narration before
+shipping; the beat-by-beat log, including the retakes it forced, is in
+`VERIFICATION.md`.
 
 Rebuild: `demo-media-kit/cap/` in the ascendion-internship repo (recorder
-scripts `clip-04*.json`, `record2.js`, `edit.py`, `combine.py`).
-
-Every clip passed a frame-by-frame check against its narration before the
-walkthrough was stitched; the full beat-by-beat log, including the one retake
-it forced, is in `VERIFICATION.md`.
+scripts `clip-04-full.json` / `clip-04*.json`, `record2.js`, `edit.py`,
+`combine.py`).

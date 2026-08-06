@@ -93,9 +93,61 @@ the user table, then re-recorded the whole clip. No video was patched.
 | "The closing shot is the docket holding the whole lifecycle side by side." | One contract SIGNED OFF, one WORKING. Exactly two rows. | PASS |
 | "That is Papyrus..." | Same closing docket, steady. | PASS |
 
-## Walkthrough
+## Chapter splice (superseded as the main walkthrough)
 
-`04-contract-review-walkthrough.mp4` (4:06) was spliced from the six all-PASS
-clips in order a → f after the 04e retake. Nothing was seeded or faked: both
-contracts ran the live pipeline on the private GPU lane, and every ruling shown
-was clicked during the take.
+The first walkthrough (4:06) was spliced from the six all-PASS clips in order
+a → f after the 04e retake. It was superseded the same day by the single-take
+recording below; the chapter clips themselves remain in `clips/`.
+
+## Single-take walkthrough — one RETAKE, then PASS
+
+CEO direction: the whole flow in one continuous recording, login only twice
+(lawyer, then admin), one contract only, a slow top-to-bottom pan of the whole
+processed contract, and long dwells on each finding beside its redline.
+Recorded via `clip-04-full.json` against a fresh empty docket each take.
+
+**Take 1 (rehearsal timing): superseded.** Completed cleanly but used the
+pre-feedback pacing; re-cut with slower pan and longer redline dwells.
+
+**Take 2: FAIL, caught by the frame gate + DB cross-check.** On this live run
+the counsel agent's concession-ask REMOVED the Accept fix button from the open
+clause card (on the chapter take it had stayed). The scripted accept therefore
+never registered: DB showed clause 10 undecided, the contract stuck at
+needs_review, the audit chain ended at 13 steps with no finish entry, and the
+frame at "Finish review" showed the guard banner "Decide every flagged clause
+first." while the narration claimed the review closed. Full retake, fresh
+upload; no database row was touched (patching a decision would fork the hash
+chain).
+
+**Hardening added before take 3:** the post-counsel ruling became "Keep their
+wording" (present in every UI variant) with matching narration, and two
+outcome guards now abort a bad take instead of shipping it: `assertText "4 OF
+4 DECIDED"` after the final ruling and `assertText "Review complete"` after
+Finish review.
+
+**Take 3 (the shipped video): PASS on all 38 beats.** Contract `P-61aff302`,
+verified against the DB: decisions `accepted` (clause 3), `rejected`/kept
+(clause 4), `edited` (clause 7), `rejected`/kept-with-counsel's-ask (clause
+10); table status `reviewed`; audit chain "Verified intact · 14 steps" on
+camera before finish, ending "review finished: 14 clauses signed off". Key
+frames read against narration:
+
+| Beat | Frame shows | Verdict |
+|---|---|---|
+| Opening / sign-in | Papyrus login card, then priya's empty docket ("Nothing here yet"). | PASS |
+| Upload + six stages | msa_novabright.docx WORKING; progress page steps of 6. | PASS |
+| Verdict | HIGH RISK 100/100, "0 OF 4 DECIDED", missing-clauses card first in the redline pane. | PASS |
+| Slow pan (5 beats) | Continuous top-to-bottom pass: their version beside the redline, clean clauses "looks standard", flagged clauses YOUR CALL, down to clause 14. | PASS |
+| Ruling 1: accept | Trio card + strikethrough diff (120 days → thirty (30) days), "In your redline" confirmation. | PASS |
+| Ruling 2: keep | Term and Termination diff dwelt on, then "Their original wording stays…" | PASS |
+| Ruling 3: own wording | Edit textarea, typed clause, "Your wording goes into the final document". | PASS |
+| Ruling 4: counsel | "Ask recorded: …seventy-two (72) hours…" lands on the open card (no re-click), then keep confirmation; header hits 4 OF 4 DECIDED (asserted). | PASS |
+| Audit + finish | "Verified intact · 14 steps, each one hash-linked", all four decisions and the concession in the chain; "Review complete… filed as precedent" (asserted). | PASS |
+| Final document | Clause 3 net-30 applied, clause 4 kept, clause 7 lawyer's wording, clause 10 kept. | PASS |
+| Export + report | Download corrected .docx; report page for P-61aff302, "4 flagged of 14 clauses". | PASS |
+| Account switch | Sign out lands the login card ON CAMERA; admin signs in — the film's only account switch. | PASS |
+| People | Clean roster (admin, priya, theo), lena created, "Lawyer account created for lena@papyrus.dev". | PASS |
+
+Nothing was seeded or faked: the contract ran the live pipeline on the private
+GPU lane, counsel is a real agent call, and every ruling shown was clicked
+during the take.
