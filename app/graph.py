@@ -197,7 +197,9 @@ def fan_in(state: ContractState) -> dict:
         c["findings"] = []
         clauses.append(c)
         by_id[c["clause_id"]] = c
-    kept = incomplete = unknown = 0
+    kept = incomplete = unknown = merged = 0
+    _sev_rank = {"high": 2, "medium": 1, "low": 0}
+    seen = {}  # (clause_id, normalized plain title) -> the surviving finding
     for f in state["findings_raw"]:
         target = by_id.get(f.get("clause_id")) if isinstance(f, dict) else None
         # counted apart because they mean different things: "unknown" is an
@@ -211,6 +213,20 @@ def fan_in(state: ContractState) -> dict:
         if not valid_finding(f):
             incomplete += 1  # half-formed findings are never shown (D34c)
             continue
+        # the same issue caught by several inspectors is ONE finding, not many:
+        # merge into the first, keep the worst severity, credit every inspector
+        key = (f["clause_id"], " ".join(f["plain"].lower().split()))
+        prior = seen.get(key)
+        if prior is not None:
+            merged += 1
+            if f.get("inspector") and f["inspector"] != prior.get("inspector"):
+                also = prior.setdefault("also_caught_by", [])
+                if f["inspector"] not in also:
+                    also.append(f["inspector"])
+            if _sev_rank.get(f["severity"], 0) > _sev_rank.get(prior.get("severity"), 0):
+                prior["severity"] = f["severity"]
+            continue
+        seen[key] = f
         target["findings"].append(f)
         kept += 1
     missing = [m for m in state.get("missing_clauses", []) if isinstance(m, dict) and m.get("severity") in ("high", "medium", "low")]
@@ -222,7 +238,8 @@ def fan_in(state: ContractState) -> dict:
         "contract_risk": risk_rollup(clauses, missing),
         "stage": "negotiating",
         "audit": [
-            f"fan-in: {kept} findings pinned, {incomplete + unknown} dropped "
+            f"fan-in: {kept} findings pinned, {merged} merged as duplicates, "
+            f"{incomplete + unknown} dropped "
             f"({incomplete} incomplete, {unknown} unknown clause), checks {checks}"
         ],
     }

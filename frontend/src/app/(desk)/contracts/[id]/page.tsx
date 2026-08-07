@@ -9,6 +9,7 @@ type Finding = {
   finding_id?: string;
   clause_id?: string;
   inspector?: string;
+  also_caught_by?: string[];
   severity?: string;
   plain?: string;
   term?: string;
@@ -72,8 +73,10 @@ function worstSeverity(c: Clause): string | null {
 function caughtBy(c: Clause): string {
   const names = [
     ...new Set(
-      (c.findings ?? []).map(
-        (f) => CHECK_NAMES[f.inspector ?? ""] ?? "a check",
+      (c.findings ?? []).flatMap((f) =>
+        [f.inspector ?? "", ...(f.also_caught_by ?? [])].map(
+          (i) => CHECK_NAMES[i] ?? "a check",
+        ),
       ),
     ),
   ];
